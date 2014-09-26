@@ -37,8 +37,8 @@ public class MovieDaoTest extends DaoTest {
 
         Movie movie = dao.getMovie(1);
 
-        assertThat(movie.getMovieId(), is(1));
-        assertThat(movie.getMovieName(), is("Jeans"));
+        assertEquals(new Integer(1), movie.getMovieId());
+        assertEquals("Jeans", movie.getMovieName());
         assertEquals(4, movie.getSongs().size());
         List<String> songNames = movie.getSongs().stream().map(Song::getSongName).collect(toList());
         assertTrue(songNames.containsAll(Arrays.asList("Anbe Anbe", "Columbus Columbus", "Enake Enaka", "Poovukul")));
@@ -52,4 +52,45 @@ public class MovieDaoTest extends DaoTest {
     }
 
 
+    @Test
+    public void shouldGetMovieAloneIfThereIsNoSongs() throws Exception {
+        Movie jeans = Movie.builder().movieId(1).movieName("Jeans").build();
+        insert(jeans);
+
+        Movie movie = dao.getMovie(1);
+
+        assertThat(movie.getMovieId(), is(1));
+        assertThat(movie.getMovieName(), is("Jeans"));
+        assertEquals(0, movie.getSongs().size());
+    }
+
+    @Test
+    public void shouldGetMultipleMovies() throws Exception {
+        Movie jeans = Movie.builder().movieId(1).movieName("Jeans").build();
+        Movie bombay = Movie.builder().movieId(2).movieName("Bombay").build();
+        Song song1 = Song.builder().songId(1).songName("Anbe Anbe").movieId(1).build();
+        Song song2 = Song.builder().songId(2).songName("Columbus Columbus").movieId(1).build();
+        Song song3 = Song.builder().songId(3).songName("Enake Enaka").movieId(1).build();
+        Song song4 = Song.builder().songId(3).songName("Kannalane").movieId(2).build();
+        Song song5 = Song.builder().songId(4).songName("Uyire Uyire").movieId(2).build();
+
+        insert(jeans, bombay);
+        insert(song1, song2, song3, song4, song5);
+
+        List<Movie> movies = dao.getAllMovies();
+
+        assertEquals(2, movies.size());
+        assertEquals("Jeans",movies.get(0).getMovieName());
+        assertEquals(3, movies.get(0).getSongs().size());
+        List<String> songNames = movies.get(0).getSongs().stream().map(Song::getSongName).collect(toList());
+        assertTrue(songNames.containsAll(Arrays.asList("Anbe Anbe", "Columbus Columbus", "Enake Enaka")));
+
+        assertEquals("Bombay", movies.get(1).getMovieName());
+        assertEquals(2, movies.get(1).getSongs().size());
+        songNames = movies.get(1).getSongs().stream().map(Song::getSongName).collect(toList());
+        assertTrue(songNames.containsAll(Arrays.asList("Kannalane", "Uyire Uyire")));
+
+
+
+    }
 }

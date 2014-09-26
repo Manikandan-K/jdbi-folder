@@ -14,10 +14,6 @@ import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * A result set mapper which maps the fields in a statement into a JavaBean. This uses
- * the JDK's built in bean mapping facilities, so it does not support nested properties.
- */
 public class CustomMapper<T> implements ResultSetMapper<T>
 {
     private final Class<T> type;
@@ -72,7 +68,7 @@ public class CustomMapper<T> implements ResultSetMapper<T>
         ResultSetMetaData metadata = rs.getMetaData();
 
         for (int i = 1; i <= metadata.getColumnCount(); ++i) {
-            String name = metadata.getColumnLabel(i).toLowerCase().replace(appendText, "");
+            String name = metadata.getColumnLabel(i).toLowerCase().replace("_", "").replace(appendText, "");
 
             PropertyDescriptor descriptor = properties.get(name);
 

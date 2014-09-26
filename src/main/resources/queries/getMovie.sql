@@ -1,9 +1,8 @@
 select
-    movie_id AS movieId,
-    movie_name AS movieName,
+    m.*,
     song_id AS song$songId,
     song_name AS song$songName
-from movie
-left join song
+from movie m
+left join song s
 using ( movie_id )
 where movie_id = :movieId

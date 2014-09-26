@@ -11,7 +11,7 @@ import java.util.List;
 @Builder
 @Getter
 @Setter
-@EqualsAndHashCode(of = {"movie_id"})
+@EqualsAndHashCode(of = {"movieId"})
 public class Movie {
     Integer movieId;
     String movieName;

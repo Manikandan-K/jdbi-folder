@@ -1,7 +1,6 @@
 package in.folder.jdbi;
 
 import in.folder.jdbi.annotations.OneToMany;
-import org.skife.jdbi.v2.BeanMapper;
 import org.skife.jdbi.v2.Folder2;
 import org.skife.jdbi.v2.StatementContext;
 import org.skife.jdbi.v2.tweak.ResultSetMapper;
@@ -12,6 +11,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.*;
 
+import static java.util.Objects.isNull;
 import static java.util.stream.Collectors.toList;
 
 public class GenericFolder<T> implements Folder2<List<T>> {
@@ -20,7 +20,7 @@ public class GenericFolder<T> implements Folder2<List<T>> {
     private List<T> acc;
 
     public GenericFolder(Class<T> type) {
-        this.mapper = new BeanMapper<>(type);
+        this.mapper = new CustomMapper<>(type);
         acc = new ArrayList<>();
     }
 
@@ -38,16 +38,19 @@ public class GenericFolder<T> implements Folder2<List<T>> {
 
         List<Field> oneToManyFields = getOneToManyFields(object);
         Set<String> childClassNames = getChildClassNames(rs);
+        List<String> resultFieldNames = getAllResultFieldNames(rs);
 
         for (String childClassName : childClassNames) {
-            Field field = oneToManyFields.stream().filter(o -> o.getAnnotation(OneToMany.class).name().equals(childClassName)).collect(toList()).get(0);
+            Field field = oneToManyFields.stream().filter(o -> o.getAnnotation(OneToMany.class).name().equalsIgnoreCase(childClassName)).collect(toList()).get(0);
             field.setAccessible(true);
             Class<?> childType = field.getAnnotation(OneToMany.class).type();
 
             try {
                 Collection<Object> childObject= field.get(object) == null ? new ArrayList<>() : (Collection<Object>) field.get(object);
-                CustomMapper<?> childMapper = new CustomMapper<>(childType, childClassName + "$");
-                childObject.add(childMapper.map(rs.getRow(), rs, ctx));
+                if( isChildRowPresent(rs, resultFieldNames, childClassName) ) {
+                    CustomMapper<?> childMapper = new CustomMapper<>(childType, childClassName + "$");
+                    childObject.add(childMapper.map(rs.getRow(), rs, ctx));
+                }
                 field.set(object,childObject);
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
@@ -59,13 +62,22 @@ public class GenericFolder<T> implements Folder2<List<T>> {
         return accumulator;
     }
 
+    private boolean isChildRowPresent(ResultSet rs, List<String> fieldNames, String childClassName) throws SQLException {
+        for (String fieldName : fieldNames) {
+             if( fieldName.contains(childClassName+"$") && !isNull(rs.getObject(fieldName)) ) {
+                return true;
+             }
+        }
+
+        return false;
+    }
+
     private Set<String> getChildClassNames(ResultSet rs) throws SQLException {
         ResultSetMetaData metaData = rs.getMetaData();
         Set<String> childClassNames = new HashSet<>();
 
         for (int i = 1; i <= metaData.getColumnCount(); i++) {
             String name = metaData.getColumnLabel(i).toLowerCase();
-
             String[] split = name.split("\\$");
             for (int j=split.length; j > 1 ; j--) {
                 childClassNames.add(split[j-2]);
@@ -73,6 +85,19 @@ public class GenericFolder<T> implements Folder2<List<T>> {
         }
 
         return childClassNames;
+    }
+
+    private List<String> getAllResultFieldNames(ResultSet rs) throws SQLException {
+        ResultSetMetaData metaData = rs.getMetaData();
+        List<String> fieldNames = new ArrayList<>();
+
+        for (int i = 1; i <= metaData.getColumnCount(); i++) {
+            fieldNames.add(metaData.getColumnLabel(i).toLowerCase());
+        }
+
+        return fieldNames;
+
+
     }
 
     private List<Field> getOneToManyFields(T object) {

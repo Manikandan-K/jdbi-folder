@@ -21,4 +21,13 @@ public abstract class MovieDao implements GetHandle {
 
         return movies.size() > 0 ? movies.get(0) : null;
     }
+
+    public List<Movie> getAllMovies() throws Exception {
+        String query = locator.locate("getAllMovies");
+        GenericFolder<Movie> folder = new GenericFolder<>(Movie.class);
+
+        return getHandle().createQuery(query)
+                .fold(folder.getAccumulator(), folder);
+    }
+
 }
