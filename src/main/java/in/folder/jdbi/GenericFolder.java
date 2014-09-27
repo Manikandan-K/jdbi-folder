@@ -12,15 +12,16 @@ import java.sql.SQLException;
 import java.util.*;
 
 import static java.util.Objects.isNull;
-import static java.util.stream.Collectors.toList;
 
 public class GenericFolder<T> implements Folder2<List<T>> {
 
     private ResultSetMapper<T> mapper;
     private List<T> acc;
+    HashMap<String, AnnotatedField> annotatedFields;
 
     public GenericFolder(Class<T> type) {
-        this.mapper = new CustomMapper<>(type);
+        mapper = new CustomMapper<>(type);
+        annotatedFields = getAnnotatedFields(type);
         acc = new ArrayList<>();
     }
 
@@ -36,25 +37,23 @@ public class GenericFolder<T> implements Folder2<List<T>> {
             object = accumulator.remove(idx);
         }
 
-        List<Field> oneToManyFields = getOneToManyFields(object);
         Set<String> childClassNames = getChildClassNames(rs);
         List<String> resultFieldNames = getAllResultFieldNames(rs);
 
         for (String childClassName : childClassNames) {
-            Field field = oneToManyFields.stream().filter(o -> o.getAnnotation(OneToMany.class).name().equalsIgnoreCase(childClassName)).collect(toList()).get(0);
+            AnnotatedField annotatedField = annotatedFields.get(childClassName);
+            Field field = annotatedField.getField();
             field.setAccessible(true);
-            Class<?> childType = field.getAnnotation(OneToMany.class).type();
 
             try {
                 List<Object> childObjectList= field.get(object) == null ? new ArrayList<>() : (List<Object>) field.get(object);
                 if( isChildRowPresent(rs, resultFieldNames, childClassName) ) {
-                    CustomMapper<?> childMapper = new CustomMapper<>(childType, childClassName + "$");
-                    Object childObject = childMapper.map(rs.getRow(), rs, ctx);
+                    Object childObject = annotatedField.getMapper().map(rs.getRow(), rs, ctx);
                     if(!childObjectList.contains(childObject)) {
                         childObjectList.add(childObject);
                     }
                 }
-                field.set(object,childObjectList);
+                field.set(object, childObjectList);
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
@@ -71,7 +70,6 @@ public class GenericFolder<T> implements Folder2<List<T>> {
                 return true;
              }
         }
-
         return false;
     }
 
@@ -97,21 +95,20 @@ public class GenericFolder<T> implements Folder2<List<T>> {
         for (int i = 1; i <= metaData.getColumnCount(); i++) {
             fieldNames.add(metaData.getColumnLabel(i).toLowerCase());
         }
-
         return fieldNames;
-
-
     }
 
-    private List<Field> getOneToManyFields(T object) {
-        List<Field> oneToManyFields = new ArrayList<>();
-        Field[] fields = object.getClass().getDeclaredFields();
+    private HashMap<String, AnnotatedField> getAnnotatedFields(Class<T> type) {
+        HashMap<String, AnnotatedField> annotatedFields = new HashMap<>();
+        Field[] fields = type.getDeclaredFields();
         for (Field field : fields) {
             if(field.isAnnotationPresent(OneToMany.class)) {
-                oneToManyFields.add(field);
+                OneToMany annotation = field.getAnnotation(OneToMany.class);
+                String name = annotation.name().toLowerCase();
+                annotatedFields.put(name, new AnnotatedField(field, new CustomMapper<>(annotation.type(), name+ "$")));
             }
         }
-        return oneToManyFields;
+        return annotatedFields;
     }
 
 }
