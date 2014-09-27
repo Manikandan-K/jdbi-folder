@@ -7,11 +7,10 @@ import lombok.experimental.Builder;
 
 import java.util.List;
 
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
 @Getter
-@Setter
 @EqualsAndHashCode(of = {"movieId"})
 public class Movie {
     private Integer movieId;

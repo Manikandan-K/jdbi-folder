@@ -3,14 +3,13 @@ package in.folder.jdbi.model;
 import lombok.*;
 import lombok.experimental.Builder;
 
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
 @Getter
-@Setter
-@EqualsAndHashCode(of={"actorId"})
-public class Actor {
-    private Integer actorId;
-    private String actorName;
+@EqualsAndHashCode(of={"songId"})
+public class Song {
+    private Integer songId;
+    private String songName;
     private Integer movieId;
 }

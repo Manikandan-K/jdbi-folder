@@ -3,11 +3,10 @@ package in.folder.jdbi.model;
 import lombok.*;
 import lombok.experimental.Builder;
 
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
 @Getter
-@Setter
 @EqualsAndHashCode(of={"directorId"})
 public class Director {
     private Integer directorId;
