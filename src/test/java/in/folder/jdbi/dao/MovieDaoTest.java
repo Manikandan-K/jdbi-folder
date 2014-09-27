@@ -2,6 +2,7 @@ package in.folder.jdbi.dao;
 
 import in.folder.jdbi.DaoTest;
 import in.folder.jdbi.model.Actor;
+import in.folder.jdbi.model.Director;
 import in.folder.jdbi.model.Movie;
 import in.folder.jdbi.model.Song;
 import org.junit.Before;
@@ -111,5 +112,20 @@ public class MovieDaoTest extends DaoTest {
         assertEquals(2, movie.getActors().size());
         List<String> actorNames = movie.getActors().stream().map(Actor::getActorName).collect(toList());
         assertTrue(actorNames.containsAll(Arrays.asList("Prashanth", "Aishwarya")));
+    }
+
+    @Test
+    public void shouldGetMovieAlongWithDirector() throws Exception {
+        Movie jeans = Movie.builder().movieId(1).movieName("Jeans").build();
+        Director shankar = Director.builder().directorId(1).directorName("Shankar").movieId(1).build();
+
+        insert(jeans);
+        insert(shankar);
+
+        Movie movie = dao.getMovie(1);
+
+        assertEquals("Jeans", movie.getMovieName());
+        assertEquals(new Integer(1), movie.getDirector().getDirectorId());
+        assertEquals("Shankar", movie.getDirector().getDirectorName());
     }
 }

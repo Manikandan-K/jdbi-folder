@@ -1,6 +1,7 @@
 package in.folder.jdbi;
 
 import in.folder.jdbi.annotations.OneToMany;
+import in.folder.jdbi.annotations.OneToOne;
 import org.skife.jdbi.v2.Folder2;
 import org.skife.jdbi.v2.StatementContext;
 import org.skife.jdbi.v2.tweak.ResultSetMapper;
@@ -37,31 +38,53 @@ public class GenericFolder<T> implements Folder2<List<T>> {
             object = accumulator.remove(idx);
         }
 
-        Set<String> childClassNames = getChildClassNames(rs);
         List<String> resultFieldNames = getAllResultFieldNames(rs);
 
-        for (String childClassName : childClassNames) {
+        for (String childClassName : getChildClassNames(rs)) {
             AnnotatedField annotatedField = annotatedFields.get(childClassName);
-            Field field = annotatedField.getField();
-            field.setAccessible(true);
-
-            try {
-                List<Object> childObjectList= field.get(object) == null ? new ArrayList<>() : (List<Object>) field.get(object);
-                if( isChildRowPresent(rs, resultFieldNames, childClassName) ) {
-                    Object childObject = annotatedField.getMapper().map(rs.getRow(), rs, ctx);
-                    if(!childObjectList.contains(childObject)) {
-                        childObjectList.add(childObject);
-                    }
-                }
-                field.set(object, childObjectList);
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
+            if(annotatedField.isOneToMany()) {
+                handleOneToMany(rs, ctx, object, resultFieldNames, childClassName, annotatedField);
+            }else if(annotatedField.isOneToOne()) {
+                handleOneToOne(rs, ctx, object, resultFieldNames, childClassName, annotatedField);
             }
-
         }
         accumulator.add(object);
 
         return accumulator;
+    }
+
+    private void handleOneToOne(ResultSet rs, StatementContext ctx, T object, List<String> resultFieldNames, String childClassName, AnnotatedField annotatedField) throws SQLException {
+        if( isChildRowPresent(rs, resultFieldNames, childClassName) ) {
+            Field field = annotatedField.getField();
+            field.setAccessible(true);
+            Object nestedObject = annotatedField.getMapper().map(rs.getRow(), rs, ctx);
+
+            try {
+            field.set(object, nestedObject);
+            }catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+
+        }
+
+    }
+
+    private void handleOneToMany(ResultSet rs, StatementContext ctx, T object, List<String> resultFieldNames, String childClassName, AnnotatedField annotatedField) throws SQLException {
+        Field field = annotatedField.getField();
+        field.setAccessible(true);
+
+        try {
+            List<Object> childObjectList= field.get(object) == null ? new ArrayList<>() : (List<Object>) field.get(object);
+            if( isChildRowPresent(rs, resultFieldNames, childClassName) ) {
+                Object childObject = annotatedField.getMapper().map(rs.getRow(), rs, ctx);
+                if(!childObjectList.contains(childObject)) {
+                    childObjectList.add(childObject);
+                }
+            }
+            field.set(object, childObjectList);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
     }
 
     private boolean isChildRowPresent(ResultSet rs, List<String> fieldNames, String childClassName) throws SQLException {
@@ -100,12 +123,18 @@ public class GenericFolder<T> implements Folder2<List<T>> {
 
     private HashMap<String, AnnotatedField> getAnnotatedFields(Class<T> type) {
         HashMap<String, AnnotatedField> annotatedFields = new HashMap<>();
-        Field[] fields = type.getDeclaredFields();
-        for (Field field : fields) {
+        for (Field field : type.getDeclaredFields()) {
+
             if(field.isAnnotationPresent(OneToMany.class)) {
                 OneToMany annotation = field.getAnnotation(OneToMany.class);
                 String name = annotation.name().toLowerCase();
-                annotatedFields.put(name, new AnnotatedField(field, new CustomMapper<>(annotation.type(), name+ "$")));
+                AnnotatedField annotatedField = new AnnotatedField(OneToMany.class,field, new CustomMapper<>(annotation.type(), name + "$"));
+                annotatedFields.put(name, annotatedField);
+            }else if(field.isAnnotationPresent(OneToOne.class)) {
+                OneToOne annotation = field.getAnnotation(OneToOne.class);
+                String name = annotation.name().toLowerCase();
+                AnnotatedField annotatedField = new AnnotatedField(OneToOne.class,field, new CustomMapper<>(annotation.type(), name + "$"));
+                annotatedFields.put(name, annotatedField);
             }
         }
         return annotatedFields;
