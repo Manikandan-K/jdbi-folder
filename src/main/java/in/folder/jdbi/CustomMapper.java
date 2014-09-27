@@ -8,6 +8,7 @@ import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.sql.*;
@@ -17,39 +18,20 @@ import java.util.Map;
 public class CustomMapper<T> implements ResultSetMapper<T>
 {
     private final Class<T> type;
-    private final Map<String, PropertyDescriptor> properties = new HashMap<String, PropertyDescriptor>();
+    private final Map<String, Field> properties = new HashMap<>();
     private final String appendText;
 
     public CustomMapper(Class<T> type)
     {
-        this.type = type;
-        this.appendText = "";
-        try {
-            BeanInfo info = Introspector.getBeanInfo(type);
-
-            for (PropertyDescriptor descriptor : info.getPropertyDescriptors()) {
-                properties.put(descriptor.getName().toLowerCase(), descriptor);
-            }
-        }
-        catch (IntrospectionException e) {
-            throw new IllegalArgumentException(e);
-        }
+        this(type, "");
     }
 
     public CustomMapper(Class<T> type, String appendText) {
         this.type = type;
         this.appendText = appendText;
-        try {
-            BeanInfo info = Introspector.getBeanInfo(type);
-
-            for (PropertyDescriptor descriptor : info.getPropertyDescriptors()) {
-                properties.put(descriptor.getName().toLowerCase(), descriptor);
-            }
+        for (Field field : type.getDeclaredFields()) {
+            properties.put(field.getName().toLowerCase(), field);
         }
-        catch (IntrospectionException e) {
-            throw new IllegalArgumentException(e);
-        }
-
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -70,10 +52,10 @@ public class CustomMapper<T> implements ResultSetMapper<T>
         for (int i = 1; i <= metadata.getColumnCount(); ++i) {
             String name = metadata.getColumnLabel(i).toLowerCase().replace("_", "").replace(appendText, "");
 
-            PropertyDescriptor descriptor = properties.get(name);
+            Field field = properties.get(name);
 
-            if (descriptor != null) {
-                Class type = descriptor.getPropertyType();
+            if (field != null) {
+                Class type = field.getType();
 
                 Object value;
 
@@ -124,21 +106,11 @@ public class CustomMapper<T> implements ResultSetMapper<T>
                     value = null;
                 }
 
-                try
-                {
-                    descriptor.getWriteMethod().invoke(bean, value);
-                }
-                catch (IllegalAccessException e) {
-                    throw new IllegalArgumentException(String.format("Unable to access setter for " +
-                            "property, %s", name), e);
-                }
-                catch (InvocationTargetException e) {
-                    throw new IllegalArgumentException(String.format("Invocation target exception trying to " +
-                            "invoker setter for the %s property", name), e);
-                }
-                catch (NullPointerException e) {
-                    throw new IllegalArgumentException(String.format("No appropriate method to " +
-                            "write property %s", name), e);
+                try {
+                    field.setAccessible(true);
+                    field.set(bean, value);
+                } catch (IllegalAccessException e) {
+                    throw new IllegalArgumentException(String.format("Unable to access the property, %s", name), e);
                 }
 
             }
