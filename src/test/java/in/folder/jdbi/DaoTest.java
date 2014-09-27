@@ -1,5 +1,6 @@
 package in.folder.jdbi;
 
+import in.folder.jdbi.model.Actor;
 import in.folder.jdbi.model.Movie;
 import in.folder.jdbi.model.Song;
 import org.junit.Before;
@@ -14,6 +15,7 @@ public class DaoTest {
     public void clear() {
         handle.execute("delete from movie");
         handle.execute("delete from song");
+        handle.execute("delete from actor");
     }
 
     protected void insert(Movie... movies) {
@@ -25,6 +27,12 @@ public class DaoTest {
     protected void insert(Song... songs) {
         for (Song song : songs) {
             handle.execute("insert into song(movie_id, song_id, song_name) values(?,?,?)", song.getMovieId(), song.getSongId(), song.getSongName());
+        }
+    }
+
+    protected void insert(Actor... actors) {
+        for (Actor actor : actors) {
+            handle.execute("insert into actor(movie_id, actor_id, actor_name) values(?,?,?)", actor.getMovieId(), actor.getActorId(), actor.getActorName());
         }
     }
 

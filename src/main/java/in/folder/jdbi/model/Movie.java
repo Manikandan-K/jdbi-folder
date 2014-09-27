@@ -13,9 +13,12 @@ import java.util.List;
 @Setter
 @EqualsAndHashCode(of = {"movieId"})
 public class Movie {
-    Integer movieId;
-    String movieName;
+    private Integer movieId;
+    private String movieName;
 
     @OneToMany(name = "song", type = Song.class)
     List<Song> songs;
+
+    @OneToMany(name = "actor", type = Actor.class)
+    List<Actor> actors;
 }

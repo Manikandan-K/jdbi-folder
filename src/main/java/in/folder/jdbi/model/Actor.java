@@ -8,9 +8,9 @@ import lombok.experimental.Builder;
 @Builder
 @Getter
 @Setter
-@EqualsAndHashCode(of={"songId"})
-public class Song {
-    Integer songId;
-    String songName;
-    Integer movieId;
+@EqualsAndHashCode(of={"actorId"})
+public class Actor {
+    private Integer actorId;
+    private String actorName;
+    private Integer movieId;
 }

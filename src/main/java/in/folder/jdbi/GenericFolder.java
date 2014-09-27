@@ -46,12 +46,15 @@ public class GenericFolder<T> implements Folder2<List<T>> {
             Class<?> childType = field.getAnnotation(OneToMany.class).type();
 
             try {
-                Collection<Object> childObject= field.get(object) == null ? new ArrayList<>() : (Collection<Object>) field.get(object);
+                List<Object> childObjectList= field.get(object) == null ? new ArrayList<>() : (List<Object>) field.get(object);
                 if( isChildRowPresent(rs, resultFieldNames, childClassName) ) {
                     CustomMapper<?> childMapper = new CustomMapper<>(childType, childClassName + "$");
-                    childObject.add(childMapper.map(rs.getRow(), rs, ctx));
+                    Object childObject = childMapper.map(rs.getRow(), rs, ctx);
+                    if(!childObjectList.contains(childObject)) {
+                        childObjectList.add(childObject);
+                    }
                 }
-                field.set(object,childObject);
+                field.set(object,childObjectList);
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
