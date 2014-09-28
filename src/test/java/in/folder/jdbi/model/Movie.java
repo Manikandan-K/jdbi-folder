@@ -2,6 +2,7 @@ package in.folder.jdbi.model;
 
 import in.folder.jdbi.annotations.OneToMany;
 import in.folder.jdbi.annotations.OneToOne;
+import in.folder.jdbi.annotations.PrimaryKey;
 import lombok.*;
 import lombok.experimental.Builder;
 
@@ -11,8 +12,8 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @Getter
-@EqualsAndHashCode(of = {"movieId"})
 public class Movie {
+    @PrimaryKey
     private Integer movieId;
     private String movieName;
 
@@ -22,7 +23,7 @@ public class Movie {
     @OneToMany(name = "actor", type = Actor.class)
     private List<Actor> actors;
 
-    @OneToOne(name = "director", type = Director.class)
+    @OneToOne(name = "director")
     private Director director;
 
 }
