@@ -1,6 +1,7 @@
 package in.folder.jdbi;
 
 
+import in.folder.jdbi.helper.FieldHelper;
 import org.skife.jdbi.v2.StatementContext;
 import org.skife.jdbi.v2.tweak.ResultSetMapper;
 
@@ -101,13 +102,7 @@ public class CustomMapper<T> implements ResultSetMapper<T>
                     value = null;
                 }
 
-                try {
-                    field.setAccessible(true);
-                    field.set(bean, value);
-                } catch (IllegalAccessException e) {
-                    throw new IllegalArgumentException(String.format("Unable to access the property, %s", name), e);
-                }
-
+                FieldHelper.set(field, bean, value);
             }
         }
 

@@ -1,5 +1,6 @@
 package in.folder.jdbi;
 
+import in.folder.jdbi.helper.FieldHelper;
 import org.skife.jdbi.v2.Folder2;
 import org.skife.jdbi.v2.StatementContext;
 import org.skife.jdbi.v2.tweak.ResultSetMapper;
@@ -58,33 +59,22 @@ public class GenericFolder<T> implements Folder2<List<T>> {
     private void handleOneToOne(ResultSet rs, StatementContext ctx, T object, List<String> resultFieldNames, String childClassName, AnnotatedField annotatedField) throws SQLException {
         if( isChildRowPresent(rs, resultFieldNames, childClassName) ) {
             Field field = annotatedField.getField();
-            field.setAccessible(true);
             Object nestedObject = annotatedField.getMapper().map(rs.getRow(), rs, ctx);
-
-            try {
-            field.set(object, nestedObject);
-            }catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
+            FieldHelper.set(field, object, nestedObject);
         }
     }
 
     private void handleOneToMany(ResultSet rs, StatementContext ctx, T object, List<String> resultFieldNames, String childClassName, AnnotatedField annotatedField) throws SQLException {
         Field field = annotatedField.getField();
-        field.setAccessible(true);
 
-        try {
-            Collection<Object> childObjectList= field.get(object) == null ? new ArrayList<>() : (Collection<Object>) field.get(object);
-            if( isChildRowPresent(rs, resultFieldNames, childClassName) ) {
-                Object childObject = annotatedField.getMapper().map(rs.getRow(), rs, ctx);
-                if(getValue(childObjectList, childObject, annotatedField.getReturnType()) == null) {
-                    childObjectList.add(childObject);
-                }
+        Collection<Object> childObjectList= FieldHelper.get(field, object) == null ? new ArrayList<>() : (Collection<Object>) FieldHelper.get(field, object);
+        if( isChildRowPresent(rs, resultFieldNames, childClassName) ) {
+            Object childObject = annotatedField.getMapper().map(rs.getRow(), rs, ctx);
+            if(getValue(childObjectList, childObject, annotatedField.getReturnType()) == null) {
+                childObjectList.add(childObject);
             }
-            field.set(object, childObjectList);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
         }
+        FieldHelper.set(field, object, childObjectList);
     }
 
     private boolean isChildRowPresent(ResultSet rs, List<String> fieldNames, String childClassName) throws SQLException {
@@ -121,17 +111,12 @@ public class GenericFolder<T> implements Folder2<List<T>> {
     }
 
     private<M> M getValue(Collection<M> collection, M object, Class<?> type) {
-        try {
-            HashMap<String, Object> filter = new HashMap<>();
-            for (AnnotatedField primaryKeyField : fieldsMap.get(type).getPrimaryKeys()) {
-                Field field = primaryKeyField.getField();
-                field.setAccessible(true);
-                filter.put(primaryKeyField.getName(), field.get(object));
-            }
-            Collection<M> result = where(collection, filter);
-            return result.size() > 0 ? result.iterator().next() : null;
+        HashMap<String, Object> filter = new HashMap<>();
+        for (AnnotatedField primaryKeyField : fieldsMap.get(type).getPrimaryKeys()) {
+            Field field = primaryKeyField.getField();
+            filter.put(primaryKeyField.getName(), FieldHelper.get(field,object));
         }
-        catch (Exception e) {}
-        return null;
+        Collection<M> result = where(collection, filter);
+        return result.size() > 0 ? result.iterator().next() : null;
     }
 }
