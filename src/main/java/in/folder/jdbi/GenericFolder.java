@@ -1,8 +1,5 @@
 package in.folder.jdbi;
 
-import in.folder.jdbi.annotations.OneToMany;
-import in.folder.jdbi.annotations.OneToOne;
-import in.folder.jdbi.annotations.PrimaryKey;
 import org.skife.jdbi.v2.Folder2;
 import org.skife.jdbi.v2.StatementContext;
 import org.skife.jdbi.v2.tweak.ResultSetMapper;
@@ -14,19 +11,21 @@ import java.sql.SQLException;
 import java.util.*;
 
 import static com.hyphen.Hyphen.where;
+import static in.folder.jdbi.AnnotatedFieldFactory.processFields;
 import static java.util.Objects.isNull;
 
 public class GenericFolder<T> implements Folder2<List<T>> {
 
     private ResultSetMapper<T> mapper;
     private List<T> acc;
-    private Map<String, AnnotatedField> annotatedFields = new HashMap<>();
-    private List<Field> primaryKeyFields = new ArrayList<>();
+    private Map<Class<?>, AnnotatedFields> fieldsMap = new HashMap<>();
+    private Class<T> type;
 
     public GenericFolder(Class<T> type) {
+        this.type = type;
         mapper = new CustomMapper<>(type);
         acc = new ArrayList<>();
-        processFields(type);
+        processFields(type, fieldsMap);
     }
 
     public List<T> getAccumulator(){
@@ -36,7 +35,7 @@ public class GenericFolder<T> implements Folder2<List<T>> {
     @Override
     public List<T> fold(List<T> accumulator, ResultSet rs, StatementContext ctx) throws SQLException {
         T object = mapper.map(rs.getRow(), rs, ctx);
-        T alreadyPresentObject = getValue(accumulator, object);
+        T alreadyPresentObject = getValue(accumulator, object, type);
         if(alreadyPresentObject != null) {
             accumulator.remove(alreadyPresentObject);
             object = alreadyPresentObject;
@@ -45,7 +44,7 @@ public class GenericFolder<T> implements Folder2<List<T>> {
         List<String> resultFieldNames = getAllResultFieldNames(rs);
 
         for (String childClassName : getChildClassNames(rs)) {
-            AnnotatedField annotatedField = annotatedFields.get(childClassName);
+            AnnotatedField annotatedField = fieldsMap.get(type).get(childClassName);
             if(annotatedField.isOneToMany()) {
                 handleOneToMany(rs, ctx, object, resultFieldNames, childClassName, annotatedField);
             }else if(annotatedField.isOneToOne()) {
@@ -75,10 +74,10 @@ public class GenericFolder<T> implements Folder2<List<T>> {
         field.setAccessible(true);
 
         try {
-            List<Object> childObjectList= field.get(object) == null ? new ArrayList<>() : (List<Object>) field.get(object);
+            Collection<Object> childObjectList= field.get(object) == null ? new ArrayList<>() : (Collection<Object>) field.get(object);
             if( isChildRowPresent(rs, resultFieldNames, childClassName) ) {
                 Object childObject = annotatedField.getMapper().map(rs.getRow(), rs, ctx);
-                if(!childObjectList.contains(childObject)) {
+                if(getValue(childObjectList, childObject, annotatedField.getReturnType()) == null) {
                     childObjectList.add(childObject);
                 }
             }
@@ -121,32 +120,18 @@ public class GenericFolder<T> implements Folder2<List<T>> {
         return fieldNames;
     }
 
-    private void processFields(Class<T> type) {
-        for (Field field : type.getDeclaredFields()) {
-            if(field.isAnnotationPresent(OneToMany.class)) {
-                AnnotatedField annotatedField =AnnotatedFieldFactory.createForOneToMany(field);
-                annotatedFields.put(annotatedField.getName(), annotatedField);
-            }else if(field.isAnnotationPresent(OneToOne.class)) {
-                AnnotatedField annotatedField =AnnotatedFieldFactory.createForOneToOne(field);
-                annotatedFields.put(annotatedField.getName(), annotatedField);
-            }else if( field.isAnnotationPresent(PrimaryKey.class)) {
-                primaryKeyFields.add(field);
-            }
-        }
-    }
-
-    private T getValue(List<T> collection, T object) {
+    private<M> M getValue(Collection<M> collection, M object, Class<?> type) {
         try {
             HashMap<String, Object> filter = new HashMap<>();
-            for (Field primaryKeyField : primaryKeyFields) {
-                primaryKeyField.setAccessible(true);
-                filter.put(primaryKeyField.getName(), primaryKeyField.get(object));
+            for (AnnotatedField primaryKeyField : fieldsMap.get(type).getPrimaryKeys()) {
+                Field field = primaryKeyField.getField();
+                field.setAccessible(true);
+                filter.put(primaryKeyField.getName(), field.get(object));
             }
-            List<T> result = where(collection, filter);
-            return result.size() > 0 ? result.get(0) : null;
+            Collection<M> result = where(collection, filter);
+            return result.size() > 0 ? result.iterator().next() : null;
         }
         catch (Exception e) {}
         return null;
     }
-
 }

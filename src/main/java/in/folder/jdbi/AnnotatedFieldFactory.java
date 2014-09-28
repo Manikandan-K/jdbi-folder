@@ -2,24 +2,57 @@ package in.folder.jdbi;
 
 import in.folder.jdbi.annotations.OneToMany;
 import in.folder.jdbi.annotations.OneToOne;
+import in.folder.jdbi.annotations.PrimaryKey;
 
 import java.lang.reflect.Field;
+import java.util.Map;
 
 public class AnnotatedFieldFactory {
 
-    public static AnnotatedField createForOneToOne(Field field) {
+
+    public static void processFields(Class<?> type, Map<Class<?>, AnnotatedFields> fieldsMap) {
+        AnnotatedFields annotatedFields = new AnnotatedFields();
+
+        for (Field field : type.getDeclaredFields()) {
+            AnnotatedField annotatedField = AnnotatedFieldFactory.create(field);
+            annotatedFields.add(annotatedField);
+            if(annotatedField != null && annotatedField.isNestedField())  {
+                processFields(annotatedField.getReturnType(), fieldsMap);
+            }
+        }
+        fieldsMap.put(type, annotatedFields);
+    }
+
+
+    public static AnnotatedField create(Field field) {
+        AnnotatedField annotatedField = null;
+        if(field.isAnnotationPresent(OneToOne.class)) {
+            annotatedField = createForOneToOne(field);
+        } else if(field.isAnnotationPresent(OneToMany.class)) {
+            annotatedField = createForOneToMany(field);
+        }else if(field.isAnnotationPresent(PrimaryKey.class)) {
+            annotatedField = createForPrimaryKey(field);
+        }
+
+        return annotatedField;
+    }
+
+    private static AnnotatedField createForOneToOne(Field field) {
         OneToOne annotation = field.getAnnotation(OneToOne.class);
 
         String name = annotation.name().toLowerCase();
-        CustomMapper<?> mapper = new CustomMapper<>(field.getType(), name + "$");
-        return new AnnotatedField(OneToOne.class, field, mapper, name);
+        return new AnnotatedField(OneToOne.class, field, field.getType(), name);
     }
 
-    public static AnnotatedField createForOneToMany(Field field) {
+    private static AnnotatedField createForOneToMany(Field field) {
         OneToMany annotation = field.getAnnotation(OneToMany.class);
 
         String name = annotation.name().toLowerCase();
-        CustomMapper<?> mapper = new CustomMapper<>(annotation.type(), name + "$");
-        return new AnnotatedField(OneToMany.class, field, mapper, name);
+        return new AnnotatedField(OneToMany.class, field, annotation.type(), name);
     }
+
+    private static AnnotatedField createForPrimaryKey(Field field) {
+        return new AnnotatedField(PrimaryKey.class, field, field.getType(), field.getName());
+    }
+
 }

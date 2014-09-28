@@ -1,5 +1,6 @@
 package in.folder.jdbi.model;
 
+import in.folder.jdbi.annotations.PrimaryKey;
 import lombok.*;
 import lombok.experimental.Builder;
 
@@ -7,8 +8,8 @@ import lombok.experimental.Builder;
 @AllArgsConstructor
 @Builder
 @Getter
-@EqualsAndHashCode(of={"actorId"})
 public class Actor {
+    @PrimaryKey
     private Integer actorId;
     private String actorName;
     private Integer movieId;
