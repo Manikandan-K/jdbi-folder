@@ -14,6 +14,10 @@ public class AnnotatedFields {
         return values.get(key);
     }
 
+    public Map<String, AnnotatedField> get() {
+        return values;
+    }
+
     public List<AnnotatedField> getPrimaryKeys() {
         return primaryKeys;
     }

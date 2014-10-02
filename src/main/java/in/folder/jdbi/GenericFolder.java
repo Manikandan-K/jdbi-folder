@@ -43,20 +43,30 @@ public class GenericFolder<T> implements Folder2<List<T>> {
         }
 
         List<String> resultFieldNames = getAllResultFieldNames(rs);
+        Set<String> childClassNames = getChildClassNames(rs);
 
-        for (String childClassName : getChildClassNames(rs)) {
-            AnnotatedField annotatedField = fieldsMap.get(type).get(childClassName);
-            if(annotatedField.isOneToMany()) {
-                handleOneToMany(rs, ctx, object, resultFieldNames, childClassName, annotatedField);
-            }else if(annotatedField.isOneToOne()) {
-                handleOneToOne(rs, ctx, object, resultFieldNames, childClassName, annotatedField);
-            }
-        }
+        mapObject(rs, ctx, object, resultFieldNames, childClassNames, type);
+
         accumulator.add(object);
         return accumulator;
     }
 
-    private void handleOneToOne(ResultSet rs, StatementContext ctx, T object, List<String> resultFieldNames, String childClassName, AnnotatedField annotatedField) throws SQLException {
+    private void mapObject(ResultSet rs, StatementContext ctx, Object object, List<String> resultFieldNames, Set<String> childClassNames, Class<?> type) throws SQLException {
+        AnnotatedFields annotatedFields = fieldsMap.get(type);
+
+        for (String childClassName : annotatedFields.get().keySet()) {
+            if(childClassNames.contains(childClassName)) {
+                AnnotatedField annotatedField = annotatedFields.get(childClassName);
+                if(annotatedField.isOneToMany()) {
+                    handleOneToMany(rs, ctx, object, resultFieldNames, childClassName, annotatedField);
+                }else if(annotatedField.isOneToOne()) {
+                    handleOneToOne(rs, ctx, object, resultFieldNames, childClassName, annotatedField);
+                }
+            }
+        }
+    }
+
+    private void handleOneToOne(ResultSet rs, StatementContext ctx, Object object, List<String> resultFieldNames, String childClassName, AnnotatedField annotatedField) throws SQLException {
         if( isChildRowPresent(rs, resultFieldNames, childClassName) ) {
             Field field = annotatedField.getField();
             Object nestedObject = annotatedField.getMapper().map(rs.getRow(), rs, ctx);
@@ -64,7 +74,7 @@ public class GenericFolder<T> implements Folder2<List<T>> {
         }
     }
 
-    private void handleOneToMany(ResultSet rs, StatementContext ctx, T object, List<String> resultFieldNames, String childClassName, AnnotatedField annotatedField) throws SQLException {
+    private void handleOneToMany(ResultSet rs, StatementContext ctx, Object object, List<String> resultFieldNames, String childClassName, AnnotatedField annotatedField) throws SQLException {
         Field field = annotatedField.getField();
 
         Collection<Object> childObjectList= FieldHelper.get(field, object) == null ? new ArrayList<>() : (Collection<Object>) FieldHelper.get(field, object);
