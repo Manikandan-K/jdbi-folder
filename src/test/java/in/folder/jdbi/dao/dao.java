@@ -2,12 +2,13 @@ package in.folder.jdbi.dao;
 
 import in.folder.jdbi.GenericFolder;
 import in.folder.jdbi.model.Movie;
+import in.folder.jdbi.model.MusicianAlbum;
 import in.folder.jdbi.util.QueryLocator;
 import org.skife.jdbi.v2.sqlobject.mixins.GetHandle;
 
 import java.util.List;
 
-public abstract class MovieDao implements GetHandle {
+public abstract class Dao implements GetHandle {
 
     private QueryLocator locator = new QueryLocator();
 
@@ -25,6 +26,14 @@ public abstract class MovieDao implements GetHandle {
     public List<Movie> getAllMovies() throws Exception {
         String query = locator.locate("getAllMovies");
         GenericFolder<Movie> folder = new GenericFolder<>(Movie.class);
+
+        return getHandle().createQuery(query)
+                .fold(folder.getAccumulator(), folder);
+    }
+
+    public List<MusicianAlbum> getAlbums()  throws Exception {
+        String query = locator.locate("getAlbums");
+        GenericFolder<MusicianAlbum> folder = new GenericFolder<>(MusicianAlbum.class);
 
         return getHandle().createQuery(query)
                 .fold(folder.getAccumulator(), folder);

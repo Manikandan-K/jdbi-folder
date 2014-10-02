@@ -17,11 +17,11 @@ import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertNull;
 
 public class MovieDaoTest extends DaoTest {
-     private MovieDao dao;
+     private Dao dao;
 
     @Before
     public void before() {
-        dao = handle.attach(MovieDao.class);
+        dao = handle.attach(Dao.class);
     }
 
     @Test

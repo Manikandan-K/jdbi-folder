@@ -1,9 +1,6 @@
 package in.folder.jdbi;
 
-import in.folder.jdbi.model.Actor;
-import in.folder.jdbi.model.Director;
-import in.folder.jdbi.model.Movie;
-import in.folder.jdbi.model.Song;
+import in.folder.jdbi.model.*;
 import org.junit.Before;
 import org.skife.jdbi.v2.DBI;
 import org.skife.jdbi.v2.Handle;
@@ -18,6 +15,8 @@ public class DaoTest {
         handle.execute("delete from song");
         handle.execute("delete from actor");
         handle.execute("delete from director");
+        handle.execute("delete from musician");
+        handle.execute("delete from album");
     }
 
     protected void insert(Movie... movies) {
@@ -41,6 +40,18 @@ public class DaoTest {
     protected void insert(Director... directors) {
         for (Director director : directors) {
             handle.execute("insert into director(movie_id, director_id, director_name) values(?,?,?)", director.getMovieId(), director.getDirectorId(), director.getDirectorName());
+        }
+    }
+
+    protected void insert(Musician... musicians) {
+        for (Musician musician : musicians) {
+            handle.execute("insert into musician(id, name) values(?,?)", musician.getId(), musician.getName());
+        }
+    }
+
+    protected void insert(Album... albums) {
+        for (Album album : albums) {
+            handle.execute("insert into album(id, name, musician_id) values(?,?,?)", album.getId(), album.getName(), album.getMusicianId());
         }
     }
 
