@@ -15,4 +15,5 @@ public class Song {
     private Integer songId;
     private String songName;
     private Integer movieId;
+    private Integer albumId;
 }

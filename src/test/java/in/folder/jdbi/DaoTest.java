@@ -27,7 +27,7 @@ public class DaoTest {
 
     protected void insert(Song... songs) {
         for (Song song : songs) {
-            handle.execute("insert into song(movie_id, song_id, song_name) values(?,?,?)", song.getMovieId(), song.getSongId(), song.getSongName());
+            handle.execute("insert into song(movie_id, song_id, song_name, album_id) values(?,?,?,?)", song.getMovieId(), song.getSongId(), song.getSongName(), song.getAlbumId());
         }
     }
 

@@ -26,7 +26,8 @@ public class AnnotatedFields {
         if(annotatedField == null) return;
         if(annotatedField.isPrimaryKey()) {
             primaryKeys.add(annotatedField);
+        }else {
+            values.put(annotatedField.getName(), annotatedField);
         }
-        values.put(annotatedField.getName(), annotatedField);
     }
 }

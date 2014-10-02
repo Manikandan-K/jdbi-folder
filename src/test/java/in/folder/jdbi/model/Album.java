@@ -1,10 +1,13 @@
 package in.folder.jdbi.model;
 
+import in.folder.jdbi.annotations.OneToMany;
 import in.folder.jdbi.annotations.PrimaryKey;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
+
+import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -15,4 +18,7 @@ public class Album {
     private Integer id;
     private String name;
     private Integer musicianId;
+
+    @OneToMany(name = "song", type = Song.class)
+    private List<Song> songs;
 }

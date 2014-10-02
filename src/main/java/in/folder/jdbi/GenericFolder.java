@@ -21,6 +21,8 @@ public class GenericFolder<T> implements Folder2<List<T>> {
     private List<T> acc;
     private Map<Class<?>, AnnotatedFields> fieldsMap = new HashMap<>();
     private Class<T> type;
+    private Set<String> childClassNames;
+    private List<String> resultFieldNames;
 
     public GenericFolder(Class<T> type) {
         this.type = type;
@@ -35,54 +37,47 @@ public class GenericFolder<T> implements Folder2<List<T>> {
 
     @Override
     public List<T> fold(List<T> accumulator, ResultSet rs, StatementContext ctx) throws SQLException {
+        processResultSet(rs);
         T object = mapper.map(rs.getRow(), rs, ctx);
-        T alreadyPresentObject = getValue(accumulator, object, type);
-        if(alreadyPresentObject != null) {
-            accumulator.remove(alreadyPresentObject);
-            object = alreadyPresentObject;
-        }
-
-        List<String> resultFieldNames = getAllResultFieldNames(rs);
-        Set<String> childClassNames = getChildClassNames(rs);
-
-        mapObject(rs, ctx, object, resultFieldNames, childClassNames, type);
-
+        object =  getAlreadyPresentValue(accumulator, object, type);
+        mapRelationObject(rs, ctx, object, type);
         accumulator.add(object);
         return accumulator;
     }
 
-    private void mapObject(ResultSet rs, StatementContext ctx, Object object, List<String> resultFieldNames, Set<String> childClassNames, Class<?> type) throws SQLException {
+    private void mapRelationObject(ResultSet rs, StatementContext ctx, Object object, Class<?> type) throws SQLException {
         AnnotatedFields annotatedFields = fieldsMap.get(type);
 
         for (String childClassName : annotatedFields.get().keySet()) {
             if(childClassNames.contains(childClassName)) {
                 AnnotatedField annotatedField = annotatedFields.get(childClassName);
                 if(annotatedField.isOneToMany()) {
-                    handleOneToMany(rs, ctx, object, resultFieldNames, childClassName, annotatedField);
+                    handleOneToMany(rs, ctx, object, childClassName, annotatedField);
                 }else if(annotatedField.isOneToOne()) {
-                    handleOneToOne(rs, ctx, object, resultFieldNames, childClassName, annotatedField);
+                    handleOneToOne(rs, ctx, object, childClassName, annotatedField);
                 }
             }
         }
     }
 
-    private void handleOneToOne(ResultSet rs, StatementContext ctx, Object object, List<String> resultFieldNames, String childClassName, AnnotatedField annotatedField) throws SQLException {
+    private void handleOneToOne(ResultSet rs, StatementContext ctx, Object object, String childClassName, AnnotatedField annotatedField) throws SQLException {
         if( isChildRowPresent(rs, resultFieldNames, childClassName) ) {
             Field field = annotatedField.getField();
             Object nestedObject = annotatedField.getMapper().map(rs.getRow(), rs, ctx);
+            mapRelationObject(rs, ctx, nestedObject, annotatedField.getReturnType());
             FieldHelper.set(field, object, nestedObject);
         }
     }
 
-    private void handleOneToMany(ResultSet rs, StatementContext ctx, Object object, List<String> resultFieldNames, String childClassName, AnnotatedField annotatedField) throws SQLException {
+    private void handleOneToMany(ResultSet rs, StatementContext ctx, Object object, String childClassName, AnnotatedField annotatedField) throws SQLException {
         Field field = annotatedField.getField();
-
         Collection<Object> childObjectList= FieldHelper.get(field, object) == null ? new ArrayList<>() : (Collection<Object>) FieldHelper.get(field, object);
+
         if( isChildRowPresent(rs, resultFieldNames, childClassName) ) {
             Object childObject = annotatedField.getMapper().map(rs.getRow(), rs, ctx);
-            if(getValue(childObjectList, childObject, annotatedField.getReturnType()) == null) {
-                childObjectList.add(childObject);
-            }
+            childObject = getAlreadyPresentValue(childObjectList, childObject, annotatedField.getReturnType());
+            mapRelationObject(rs, ctx, childObject, annotatedField.getReturnType());
+            childObjectList.add(childObject);
         }
         FieldHelper.set(field, object, childObjectList);
     }
@@ -94,6 +89,11 @@ public class GenericFolder<T> implements Folder2<List<T>> {
              }
         }
         return false;
+    }
+
+    private void processResultSet(ResultSet rs) throws SQLException {
+        this.childClassNames = getChildClassNames(rs);
+        this.resultFieldNames = getAllResultFieldNames(rs);
     }
 
     private Set<String> getChildClassNames(ResultSet rs) throws SQLException {
@@ -118,6 +118,15 @@ public class GenericFolder<T> implements Folder2<List<T>> {
             fieldNames.add(metaData.getColumnLabel(i).toLowerCase());
         }
         return fieldNames;
+    }
+
+    public <M> M getAlreadyPresentValue(Collection<M> collection, M object, Class<?> type){
+        M alreadyPresentObject = getValue(collection, object, type);
+        if(alreadyPresentObject != null) {
+            collection.remove(alreadyPresentObject);
+            return alreadyPresentObject;
+        }
+        return object;
     }
 
     private<M> M getValue(Collection<M> collection, M object, Class<?> type) {
