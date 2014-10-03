@@ -5,6 +5,6 @@ import java.sql.SQLException;
 
 public interface FieldMapperFactory<T> {
     public T getValue(ResultSet rs, int index) throws SQLException;
+    public Boolean accepts(Class<?> type);
 
-    public Class<T> getType();
 }

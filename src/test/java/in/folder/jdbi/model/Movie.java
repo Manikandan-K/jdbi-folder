@@ -6,6 +6,7 @@ import in.folder.jdbi.annotations.PrimaryKey;
 import lombok.*;
 import lombok.experimental.Builder;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @NoArgsConstructor
@@ -25,5 +26,7 @@ public class Movie {
 
     @OneToOne(name = "director")
     private Director director;
+
+    private BigDecimal ratings;
 
 }

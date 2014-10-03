@@ -7,9 +7,10 @@ import org.skife.jdbi.v2.StatementContext;
 import org.skife.jdbi.v2.tweak.ResultSetMapper;
 
 import java.lang.reflect.Field;
-import java.math.BigDecimal;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static java.util.Objects.nonNull;
@@ -19,14 +20,13 @@ public class CustomMapper<T> implements ResultSetMapper<T>
     private final Class<T> type;
     private final Map<String, Field> fields = new HashMap<>();
     private final String appendText;
-    private HashMap<Class<?>, FieldMapperFactory> factories = new HashMap<>();
+    private List<FieldMapperFactory> factories = new ArrayList<>();
 
-    public CustomMapper(Class<T> type)
-    {
-        this(type, "");
+    public CustomMapper(Class<T> type, List<FieldMapperFactory> overriddenFactories) {
+        this(type, "", overriddenFactories);
     }
 
-    public CustomMapper(Class<T> type, String appendText) {
+    public CustomMapper(Class<T> type, String appendText, List<FieldMapperFactory> overriddenFactories) {
         this.type = type;
         this.appendText = appendText;
         for (Field field : type.getDeclaredFields()) {
@@ -34,11 +34,8 @@ public class CustomMapper<T> implements ResultSetMapper<T>
             String name = nonNull(annotation) ? annotation.value().toLowerCase() : field.getName().toLowerCase();
             fields.put(name, field);
         }
-    }
-
-    public CustomMapper(Class<T> type, HashMap<Class<?>, FieldMapperFactory> factories) {
-        this(type, "");
-        this.factories = factories;
+        this.factories.addAll(overriddenFactories);
+        this.factories.addAll(new FieldMapperFactories().getValues());
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -56,61 +53,32 @@ public class CustomMapper<T> implements ResultSetMapper<T>
 
         ResultSetMetaData metadata = rs.getMetaData();
 
-        for (int i = 1; i <= metadata.getColumnCount(); ++i) {
-            String name = metadata.getColumnLabel(i).toLowerCase().replace("_", "").replace(appendText, "");
+        for (int index = 1; index <= metadata.getColumnCount(); ++index) {
+            String name = metadata.getColumnLabel(index).toLowerCase().replace("_", "").replace(appendText, "");
 
             Field field = fields.get(name);
 
             if (field != null) {
                 Class type = field.getType();
 
-                Object value;
+                Object value = null;
+                Boolean assigned = false;
 
-                FieldMapperFactory fieldMapperFactory = factories.get(type);
+                for (FieldMapperFactory defaultFactory : factories) {
+                    if(defaultFactory.accepts(type)) {
+                        value = defaultFactory.getValue(rs, index);
+                        assigned = true;
+                        break;
+                    }
+                }
 
-                if(nonNull(fieldMapperFactory)) {
-                    value = fieldMapperFactory.getValue(rs,i);
-                } else if (type.isAssignableFrom(Boolean.class) || type.isAssignableFrom(boolean.class)) {
-                    value = rs.getBoolean(i);
-                }
-                else if (type.isAssignableFrom(Byte.class) || type.isAssignableFrom(byte.class)) {
-                    value = rs.getByte(i);
-                }
-                else if (type.isAssignableFrom(Short.class) || type.isAssignableFrom(short.class)) {
-                    value = rs.getShort(i);
-                }
-                else if (type.isAssignableFrom(Integer.class) || type.isAssignableFrom(int.class)) {
-                    value = rs.getInt(i);
-                }
-                else if (type.isAssignableFrom(Long.class) || type.isAssignableFrom(long.class)) {
-                    value = rs.getLong(i);
-                }
-                else if (type.isAssignableFrom(Float.class) || type.isAssignableFrom(float.class)) {
-                    value = rs.getFloat(i);
-                }
-                else if (type.isAssignableFrom(Double.class) || type.isAssignableFrom(double.class)) {
-                    value = rs.getDouble(i);
-                }
-                else if (type.isAssignableFrom(BigDecimal.class)) {
-                    value = rs.getBigDecimal(i);
-                }
-                else if (type.isAssignableFrom(Timestamp.class)) {
-                    value = rs.getTimestamp(i);
-                }
-                else if (type.isAssignableFrom(Time.class)) {
-                    value = rs.getTime(i);
-                }
-                else if (type.isAssignableFrom(java.util.Date.class)) {
-                    value = rs.getDate(i);
-                }
-                else if (type.isAssignableFrom(String.class)) {
-                    value = rs.getString(i);
-                }
-                else if (type.isEnum()) {
-                    value = Enum.valueOf(type, rs.getString(i));
-                }
-                else {
-                    value = rs.getObject(i);
+                if(!assigned) {
+                    if (type.isEnum() && !assigned) {
+                        value = Enum.valueOf(type, rs.getString(index));
+                    }
+                    else {
+                        value = rs.getObject(index);
+                    }
                 }
 
                 if (rs.wasNull() && !type.isPrimitive()) {

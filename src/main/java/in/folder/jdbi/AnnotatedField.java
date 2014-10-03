@@ -20,7 +20,7 @@ public class AnnotatedField {
         this.field = field;
         if(!isPrimaryKey())  {
             this.returnType = returnType;
-            this.mapper = new CustomMapper<>(returnType, name + "$");
+            this.mapper = new CustomMapper<>(returnType, name + "$", GenericFolder.getOverriddenFactories());
         }
         this.name = name;
     }

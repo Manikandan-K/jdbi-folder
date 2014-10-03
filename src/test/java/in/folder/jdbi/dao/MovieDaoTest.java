@@ -1,6 +1,8 @@
 package in.folder.jdbi.dao;
 
 import in.folder.jdbi.DaoTest;
+import in.folder.jdbi.GenericFolder;
+import in.folder.jdbi.mapper.BigDecimalMapperFactory;
 import in.folder.jdbi.model.Actor;
 import in.folder.jdbi.model.Director;
 import in.folder.jdbi.model.Movie;
@@ -8,6 +10,7 @@ import in.folder.jdbi.model.Song;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 
@@ -127,5 +130,17 @@ public class MovieDaoTest extends DaoTest {
         assertEquals("Jeans", movie.getMovieName());
         assertEquals(new Integer(1), movie.getDirector().getDirectorId());
         assertEquals("Shankar", movie.getDirector().getDirectorName());
+    }
+
+    @Test
+    public void shouldTakeOverriddenMapperFactoryIfSpecified() throws Exception {
+        Movie jeans = Movie.builder().movieId(1).movieName("Jeans").ratings(BigDecimal.ONE).build();
+        insert(jeans);
+
+        GenericFolder.register(new BigDecimalMapperFactory());
+
+        Movie movie = dao.getMovie(1);
+
+        assertEquals(BigDecimal.TEN, movie.getRatings());
     }
 }

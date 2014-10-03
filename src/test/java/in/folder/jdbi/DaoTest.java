@@ -29,7 +29,7 @@ public class DaoTest {
 
     protected void insert(Movie... movies) {
         for (Movie movie : movies) {
-            handle.execute("insert into movie(movie_id, movie_name) values(?,?)", movie.getMovieId(), movie.getMovieName());
+            handle.execute("insert into movie(movie_id, movie_name, ratings) values(?,?,?)", movie.getMovieId(), movie.getMovieName(),movie.getRatings());
         }
     }
 

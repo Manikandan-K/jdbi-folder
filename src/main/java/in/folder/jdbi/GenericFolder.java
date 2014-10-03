@@ -2,6 +2,7 @@ package in.folder.jdbi;
 
 import in.folder.jdbi.helper.FieldHelper;
 import in.folder.jdbi.mapper.CustomMapper;
+import in.folder.jdbi.mapper.FieldMapperFactory;
 import org.skife.jdbi.v2.Folder2;
 import org.skife.jdbi.v2.StatementContext;
 import org.skife.jdbi.v2.tweak.ResultSetMapper;
@@ -24,10 +25,11 @@ public class GenericFolder<T> implements Folder2<List<T>> {
     private Class<T> type;
     private Set<String> childClassNames;
     private List<String> resultFieldNames;
+    private static List<FieldMapperFactory> overriddenFactories = new ArrayList<>();
 
     public GenericFolder(Class<T> type) {
         this.type = type;
-        mapper = new CustomMapper<>(type);
+        mapper = new CustomMapper<>(type, overriddenFactories);
         acc = new ArrayList<>();
         processFields(type, fieldsMap);
     }
@@ -139,4 +141,13 @@ public class GenericFolder<T> implements Folder2<List<T>> {
         Collection<M> result = where(collection, filter);
         return result.size() > 0 ? result.iterator().next() : null;
     }
+
+    public static void register(FieldMapperFactory factory) {
+        overriddenFactories.add(factory);
+    }
+
+    static List<FieldMapperFactory> getOverriddenFactories(){
+        return overriddenFactories;
+    }
+
 }

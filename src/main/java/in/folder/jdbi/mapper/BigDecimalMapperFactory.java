@@ -11,7 +11,8 @@ public class BigDecimalMapperFactory implements FieldMapperFactory<BigDecimal>{
         return BigDecimal.TEN;
     }
 
-    public Class<BigDecimal> getType() {
-        return BigDecimal.class;
+    @Override
+    public Boolean accepts(Class<?> type) {
+        return type.isAssignableFrom(BigDecimal.class);
     }
 }
