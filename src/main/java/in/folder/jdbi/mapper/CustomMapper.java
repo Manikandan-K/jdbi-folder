@@ -19,6 +19,7 @@ public class CustomMapper<T> implements ResultSetMapper<T>
     private final Class<T> type;
     private final Map<String, Field> fields = new HashMap<>();
     private final String appendText;
+    private HashMap<Class<?>, FieldMapperFactory> factories = new HashMap<>();
 
     public CustomMapper(Class<T> type)
     {
@@ -33,6 +34,11 @@ public class CustomMapper<T> implements ResultSetMapper<T>
             String name = nonNull(annotation) ? annotation.value().toLowerCase() : field.getName().toLowerCase();
             fields.put(name, field);
         }
+    }
+
+    public CustomMapper(Class<T> type, HashMap<Class<?>, FieldMapperFactory> factories) {
+        this(type, "");
+        this.factories = factories;
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -60,7 +66,11 @@ public class CustomMapper<T> implements ResultSetMapper<T>
 
                 Object value;
 
-                if (type.isAssignableFrom(Boolean.class) || type.isAssignableFrom(boolean.class)) {
+                FieldMapperFactory fieldMapperFactory = factories.get(type);
+
+                if(nonNull(fieldMapperFactory)) {
+                    value = fieldMapperFactory.getValue(rs,i);
+                } else if (type.isAssignableFrom(Boolean.class) || type.isAssignableFrom(boolean.class)) {
                     value = rs.getBoolean(i);
                 }
                 else if (type.isAssignableFrom(Byte.class) || type.isAssignableFrom(byte.class)) {

@@ -1,5 +1,6 @@
 package in.folder.jdbi;
 
+import in.folder.jdbi.mapper.BigDecimalMapperFactory;
 import in.folder.jdbi.mapper.CustomMapperFactory;
 import in.folder.jdbi.model.*;
 import org.junit.Before;
@@ -9,7 +10,9 @@ import org.skife.jdbi.v2.Handle;
 public class DaoTest {
     protected static DBI dbi= new DBI("jdbc:postgresql://localhost:5432/jdbi","postgres","pass");
     static {
-        dbi.registerMapper(new CustomMapperFactory(Movie.class));
+        CustomMapperFactory factory = new CustomMapperFactory(Movie.class);
+        factory.register(new BigDecimalMapperFactory());
+        dbi.registerMapper(factory);
     }
     protected static Handle handle = dbi.open();
 
@@ -62,7 +65,7 @@ public class DaoTest {
 
     protected void insert(Team... teams) {
         for (Team team : teams) {
-            handle.execute("insert into team(id, name) values(?,?)", team.getTeamId(), team.getTeamName());
+            handle.execute("insert into team(id, name, average) values(?,?,?)", team.getTeamId(), team.getTeamName(), team.getAverage());
         }
     }
 

@@ -7,11 +7,12 @@ import in.folder.jdbi.model.Team;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-public class SqlObjectDaoTest extends DaoTest{
+public class SqlObjectDaoTest extends DaoTest {
     private SqlObjectDao dao;
 
     @Before
@@ -40,16 +41,30 @@ public class SqlObjectDaoTest extends DaoTest{
 
     @Test
     public void shouldUseColumnNameWhileMapping() throws Exception {
-        Team csk = new Team(1, "CSK");
-        Team rcb = new Team(2, "RCB");
-        Team mi = new Team(3, "MI");
+        Team csk = Team.builder().teamId(1).teamName("CSK").build();
+        Team rcb = Team.builder().teamId(2).teamName("RCB").build();
+        Team mi  = Team.builder().teamId(3).teamName("MI") .build();
         insert(csk, rcb, mi);
 
         List<Team> teams = dao.getTeam();
 
         assertEquals(3, teams.size());
-        assertEquals(csk, teams.get(0));
-        assertEquals(rcb, teams.get(1));
-        assertEquals(mi, teams.get(2));
+        assertEquals(new Integer(1), teams.get(0).getTeamId());
+        assertEquals("CSK", teams.get(0).getTeamName());
+        assertEquals(new Integer(2), teams.get(1).getTeamId());
+        assertEquals("RCB", teams.get(1).getTeamName());
+        assertEquals(new Integer(3), teams.get(2).getTeamId());
+        assertEquals("MI", teams.get(2).getTeamName());
+    }
+
+    @Test
+    public void shouldUseCustomMapperForFactoryForBigDecimal(){
+        Team csk = new Team(1,"CSK",BigDecimal.ONE);
+        insert(csk);
+
+        List<Team> teams = dao.getTeam();
+
+        assertEquals(1, teams.size());
+        assertEquals(BigDecimal.TEN, teams.get(0).getAverage());
     }
 }
