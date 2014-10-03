@@ -4,6 +4,7 @@ package in.folder.jdbi;
 import in.folder.jdbi.annotations.OneToMany;
 import in.folder.jdbi.annotations.OneToOne;
 import in.folder.jdbi.annotations.PrimaryKey;
+import in.folder.jdbi.mapper.CustomMapper;
 
 import java.lang.reflect.Field;
 

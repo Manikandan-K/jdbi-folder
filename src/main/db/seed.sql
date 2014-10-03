@@ -6,5 +6,6 @@ create table director( movie_id numeric not null, director_id numeric not null, 
 
 create table musician (id numeric not null, name varchar not null);
 create table album (id numeric not null, name varchar not null, musician_id numeric);
+create table team (id numeric not null, name varchar not null);
 
 

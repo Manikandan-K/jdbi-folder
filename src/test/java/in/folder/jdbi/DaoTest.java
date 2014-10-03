@@ -1,5 +1,6 @@
 package in.folder.jdbi;
 
+import in.folder.jdbi.mapper.CustomMapperFactory;
 import in.folder.jdbi.model.*;
 import org.junit.Before;
 import org.skife.jdbi.v2.DBI;
@@ -7,6 +8,9 @@ import org.skife.jdbi.v2.Handle;
 
 public class DaoTest {
     protected static DBI dbi= new DBI("jdbc:postgresql://localhost:5432/jdbi","postgres","pass");
+    static {
+        dbi.registerMapper(new CustomMapperFactory(Movie.class));
+    }
     protected static Handle handle = dbi.open();
 
     @Before
@@ -17,6 +21,7 @@ public class DaoTest {
         handle.execute("delete from director");
         handle.execute("delete from musician");
         handle.execute("delete from album");
+        handle.execute("delete from team");
     }
 
     protected void insert(Movie... movies) {
@@ -54,5 +59,12 @@ public class DaoTest {
             handle.execute("insert into album(id, name, musician_id) values(?,?,?)", album.getId(), album.getName(), album.getMusicianId());
         }
     }
+
+    protected void insert(Team... teams) {
+        for (Team team : teams) {
+            handle.execute("insert into team(id, name) values(?,?)", team.getTeamId(), team.getTeamName());
+        }
+    }
+
 
 }

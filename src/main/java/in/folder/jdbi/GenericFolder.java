@@ -1,6 +1,7 @@
 package in.folder.jdbi;
 
 import in.folder.jdbi.helper.FieldHelper;
+import in.folder.jdbi.mapper.CustomMapper;
 import org.skife.jdbi.v2.Folder2;
 import org.skife.jdbi.v2.StatementContext;
 import org.skife.jdbi.v2.tweak.ResultSetMapper;

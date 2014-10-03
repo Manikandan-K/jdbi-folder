@@ -1,6 +1,7 @@
-package in.folder.jdbi;
+package in.folder.jdbi.mapper;
 
 
+import in.folder.jdbi.annotations.ColumnName;
 import in.folder.jdbi.helper.FieldHelper;
 import org.skife.jdbi.v2.StatementContext;
 import org.skife.jdbi.v2.tweak.ResultSetMapper;
@@ -11,10 +12,12 @@ import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.util.Objects.nonNull;
+
 public class CustomMapper<T> implements ResultSetMapper<T>
 {
     private final Class<T> type;
-    private final Map<String, Field> properties = new HashMap<>();
+    private final Map<String, Field> fields = new HashMap<>();
     private final String appendText;
 
     public CustomMapper(Class<T> type)
@@ -26,7 +29,9 @@ public class CustomMapper<T> implements ResultSetMapper<T>
         this.type = type;
         this.appendText = appendText;
         for (Field field : type.getDeclaredFields()) {
-            properties.put(field.getName().toLowerCase(), field);
+            ColumnName annotation = field.getAnnotation(ColumnName.class);
+            String name = nonNull(annotation) ? annotation.value().toLowerCase() : field.getName().toLowerCase();
+            fields.put(name, field);
         }
     }
 
@@ -34,9 +39,9 @@ public class CustomMapper<T> implements ResultSetMapper<T>
     public T map(int row, ResultSet rs, StatementContext ctx)
             throws SQLException
     {
-        T bean;
+        T object;
         try {
-            bean = type.newInstance();
+            object = type.newInstance();
         }
         catch (Exception e) {
             throw new IllegalArgumentException(String.format("A bean, %s, was mapped " +
@@ -48,7 +53,7 @@ public class CustomMapper<T> implements ResultSetMapper<T>
         for (int i = 1; i <= metadata.getColumnCount(); ++i) {
             String name = metadata.getColumnLabel(i).toLowerCase().replace("_", "").replace(appendText, "");
 
-            Field field = properties.get(name);
+            Field field = fields.get(name);
 
             if (field != null) {
                 Class type = field.getType();
@@ -102,11 +107,11 @@ public class CustomMapper<T> implements ResultSetMapper<T>
                     value = null;
                 }
 
-                FieldHelper.set(field, bean, value);
+                FieldHelper.set(field, object, value);
             }
         }
 
-        return bean;
+        return object;
     }
 }
 

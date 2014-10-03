@@ -1,9 +1,12 @@
 package in.folder.jdbi.util;
 
+import org.skife.jdbi.v2.StatementContext;
+import org.skife.jdbi.v2.tweak.StatementLocator;
+
 import java.io.InputStream;
 import java.util.Scanner;
 
-public class QueryLocator  {
+public class QueryLocator implements StatementLocator {
 
     public String locate(String name) throws Exception {
         InputStream resource = QueryLocator.class.getResourceAsStream("/queries/" + name + ".sql");
@@ -21,4 +24,8 @@ public class QueryLocator  {
         return query;
     }
 
+    @Override
+    public String locate(String name, StatementContext ctx) throws Exception {
+        return locate(name);
+    }
 }
