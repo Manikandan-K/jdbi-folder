@@ -5,6 +5,7 @@ Folder:
 ----------------------
 
   JDBI doesn't give the provision to automatically map results to  "one to many" relationship in java objects. We need to write the folder for all classes wherever we have "one to many" relationship. If we have more than two level of parent child relation, lets say entity A has many B entity and B has many C entity, folder logic will be cumbersome. Either we need to write the complex folder logic or fire multiple queries and mash up the values in java. 
+  
   Can we have hibernate like annotation in jdbi ? Can we use those annotations while fetching results ?
   The answer is 'Yes'. Using this library, we can use hibernate like annotations.
   
@@ -75,7 +76,7 @@ Mapper:
   
     dbi.registerMapper(new CustomMapperFactory(Product.class));
     
-  By default, this mapper will be used for all the classes unless we specify some classes in the excluded list like we did above. And also if we want have any special case while mapping fiels, we can do that also. We need implement FieldMapperFactory<T>. Lets say we want to have the precison of all BigDecimal to 5.
+  By default, this mapper will be used for all the classes unless we specify some classes in the excluded list like we did above. And also if we want have any special case while mapping fields, we can do that also. We need to implement FieldMapperFactory<T>. Lets say we want to have the precison of all BigDecimal to 5.
   
     public class BigDecimalMapperFactory implements FieldMapperFactory<BigDecimal>{
   
