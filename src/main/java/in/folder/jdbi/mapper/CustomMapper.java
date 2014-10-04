@@ -8,10 +8,7 @@ import org.skife.jdbi.v2.tweak.ResultSetMapper;
 
 import java.lang.reflect.Field;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static java.util.Objects.nonNull;
 
@@ -29,13 +26,23 @@ public class CustomMapper<T> implements ResultSetMapper<T>
     public CustomMapper(Class<T> type, String appendText, List<FieldMapperFactory> overriddenFactories) {
         this.type = type;
         this.appendText = appendText;
-        for (Field field : type.getDeclaredFields()) {
+        for (Field field : getFields(type)) {
             ColumnName annotation = field.getAnnotation(ColumnName.class);
             String name = nonNull(annotation) ? annotation.value().toLowerCase() : field.getName().toLowerCase();
             fields.put(name, field);
         }
         this.factories.addAll(overriddenFactories);
         this.factories.addAll(new FieldMapperFactories().getValues());
+    }
+
+    private List<Field> getFields(Class<?> type) {
+        List<Field> result = new ArrayList<>();
+        Class<?> clazz = type;
+        while(clazz.getSuperclass() != null) {
+            result.addAll(Arrays.asList(clazz.getDeclaredFields()));
+            clazz = clazz.getSuperclass();
+        }
+        return result;
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})

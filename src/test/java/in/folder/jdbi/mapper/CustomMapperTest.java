@@ -1,6 +1,7 @@
 package in.folder.jdbi.mapper;
 
 import in.folder.jdbi.annotations.ColumnName;
+import lombok.Getter;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -142,36 +143,40 @@ public class CustomMapperTest {
 
         assertSame(columnVal, sampleBean.getColumn());
     }
+
+    @Test
+    public void shouldMapValueForSuperClassFieldsAlso() throws Exception {
+        when(resultSetMetaData.getColumnCount()).thenReturn(2);
+        when(resultSetMetaData.getColumnLabel(1)).thenReturn("stringField");
+        when(resultSetMetaData.getColumnLabel(2)).thenReturn("superString");
+
+        when(resultSet.getMetaData()).thenReturn(resultSetMetaData);
+        String beanString = "String value";
+        String superString = "Super String value";
+        when(resultSet.getString(1)).thenReturn(beanString);
+        when(resultSet.getString(2)).thenReturn(superString);
+        SampleBean sampleBean = mapper.map(0, resultSet, ctx);
+
+        assertSame(beanString, sampleBean.getStringField());
+        assertSame(superString, sampleBean.getSuperString());
+
+    }
 }
 
 
-class SampleBean {
+
+@Getter
+class SampleBean extends SuperClassBean{
     private Long longField;
     protected String stringField;
     public int intField;
     BigDecimal bigDecimalField;
-
     @ColumnName("columnName")
     private String column;
+}
 
-    public Long getLongField() {
-        return longField;
-    }
-
-    public String getStringField() {
-        return stringField;
-    }
-
-    public int getIntField() {
-        return intField;
-    }
-
-    public BigDecimal getBigDecimalField() {
-        return bigDecimalField;
-    }
-
-    public String getColumn(){
-        return column;
-    }
+@Getter
+class SuperClassBean {
+    private String superString;
 }
 
