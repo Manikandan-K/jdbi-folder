@@ -1,10 +1,7 @@
 package in.folder.jdbi.mapper;
 
 import java.math.BigDecimal;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Time;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -18,14 +15,24 @@ public class FieldMapperFactories {
         factories.add(new ByteMapperFactory());
         factories.add(new ShortMapperFactory());
         factories.add(new IntegerMapperFactory());
+        factories.add(new IntegerArrayMapperFactory());
+        factories.add(new IntArrayMapperFactory());
         factories.add(new LongMapperFactory());
+        factories.add(new LongObjectArrayMapperFactory());
+        factories.add(new LongArrayMapperFactory());
         factories.add(new FloatMapperFactory());
+        factories.add(new FloatObjectArrayMapperFactory());
+        factories.add(new FloatArrayMapperFactory());
         factories.add(new DoubleMapperFactory());
+        factories.add(new DoubleObjectArrayMapperFactory());
+        factories.add(new DoubleArrayMapperFactory());
         factories.add(new BigDecimalMapperFactory());
+        factories.add(new BigDecimalArrayMapperFactory());
         factories.add(new TimestampMapperFactory());
         factories.add(new TimeMapperFactory());
         factories.add(new DateMapperFactory());
         factories.add(new StringMapperFactory());
+        factories.add(new StringArrayMapperFactory());
     }
 
     public List<FieldMapperFactory> getValues() {
@@ -156,7 +163,7 @@ public class FieldMapperFactories {
     public static class DateMapperFactory implements FieldMapperFactory<Date>{
         @Override
         public Date getValue(ResultSet rs, int index) throws SQLException {
-            return rs.getDate(index);
+            return new Date(rs.getDate(index).getTime());
         }
 
         @Override
@@ -176,5 +183,166 @@ public class FieldMapperFactories {
             return type.isAssignableFrom(String.class);
         }
     }
+
+    public class IntegerArrayMapperFactory implements FieldMapperFactory<Integer[]>{
+
+        @Override
+        public Integer[] getValue(ResultSet rs, int index) throws SQLException {
+            Array array = rs.getArray(index);
+            if(array == null)
+                return new Integer[]{};
+            return (Integer[])array.getArray();
+        }
+
+        @Override
+        public Boolean accepts(Class<?> type) {
+            return type == Integer[].class;
+        }
+    }
+
+    public class IntArrayMapperFactory implements FieldMapperFactory<int[]>{
+
+        @Override
+        public int[] getValue(ResultSet rs, int index) throws SQLException {
+            Array array = rs.getArray(index);
+            if(array == null)
+                return new int[]{};
+            return (int[])array.getArray();
+        }
+
+        @Override
+        public Boolean accepts(Class<?> type) {
+            return type == int[].class;
+        }
+    }
+
+    public class StringArrayMapperFactory implements FieldMapperFactory<String[]>{
+
+        @Override
+        public String[] getValue(ResultSet rs, int index) throws SQLException {
+            Array array = rs.getArray(index);
+            if(array == null)
+                return new String[]{};
+            return (String[])array.getArray();
+        }
+
+        @Override
+        public Boolean accepts(Class<?> type) {
+            return type == String[].class;
+        }
+    }
+
+    public class LongObjectArrayMapperFactory implements FieldMapperFactory<Long[]>{
+
+        @Override
+        public Long[] getValue(ResultSet rs, int index) throws SQLException {
+            Array array = rs.getArray(index);
+            if(array == null)
+                return new Long[]{};
+            return (Long[])array.getArray();
+        }
+
+        @Override
+        public Boolean accepts(Class<?> type) {
+            return type == Long[].class;
+        }
+    }
+
+    public class LongArrayMapperFactory implements FieldMapperFactory<long[]>{
+
+        @Override
+        public long[] getValue(ResultSet rs, int index) throws SQLException {
+            Array array = rs.getArray(index);
+            if(array == null)
+                return new long[]{};
+            return (long[])array.getArray();
+        }
+
+        @Override
+        public Boolean accepts(Class<?> type) {
+            return type == long[].class;
+        }
+    }
+
+    public class FloatObjectArrayMapperFactory implements FieldMapperFactory<Float[]>{
+
+        @Override
+        public Float[] getValue(ResultSet rs, int index) throws SQLException {
+            Array array = rs.getArray(index);
+            if(array == null)
+                return new Float[]{};
+            return (Float[])array.getArray();
+        }
+
+        @Override
+        public Boolean accepts(Class<?> type) {
+            return type == Float[].class;
+        }
+    }
+
+    public class FloatArrayMapperFactory implements FieldMapperFactory<float[]>{
+
+        @Override
+        public float[] getValue(ResultSet rs, int index) throws SQLException {
+            Array array = rs.getArray(index);
+            if(array == null)
+                return new float[]{};
+            return (float[])array.getArray();
+        }
+
+        @Override
+        public Boolean accepts(Class<?> type) {
+            return type == float[].class;
+        }
+    }
+
+    public class DoubleObjectArrayMapperFactory implements FieldMapperFactory<Double[]>{
+
+        @Override
+        public Double[] getValue(ResultSet rs, int index) throws SQLException {
+            Array array = rs.getArray(index);
+            if(array == null)
+                return new Double[]{};
+            return (Double[])array.getArray();
+        }
+
+        @Override
+        public Boolean accepts(Class<?> type) {
+            return type == Double[].class;
+        }
+    }
+
+    public class DoubleArrayMapperFactory implements FieldMapperFactory<double[]>{
+
+        @Override
+        public double[] getValue(ResultSet rs, int index) throws SQLException {
+            Array array = rs.getArray(index);
+            if(array == null)
+                return new double[]{};
+            return (double[])array.getArray();
+        }
+
+        @Override
+        public Boolean accepts(Class<?> type) {
+            return type == double[].class ;
+        }
+    }
+
+    public class BigDecimalArrayMapperFactory implements FieldMapperFactory<BigDecimal[]>{
+
+        @Override
+        public BigDecimal[] getValue(ResultSet rs, int index) throws SQLException {
+            Array array = rs.getArray(index);
+            if(array == null)
+                return new BigDecimal[]{};
+            return (BigDecimal[])array.getArray();
+        }
+
+        @Override
+        public Boolean accepts(Class<?> type) {
+            return type == BigDecimal[].class;
+        }
+    }
+
 
 }
