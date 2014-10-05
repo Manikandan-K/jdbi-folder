@@ -16,23 +16,27 @@ public class CustomMapper<T> implements ResultSetMapper<T>
 {
     private final Class<T> type;
     private final Map<String, Field> fields = new HashMap<>();
-    private final String appendText;
+    private String appendText = "";
     private List<FieldMapperFactory> factories = new ArrayList<>();
 
-    public CustomMapper(Class<T> type, List<FieldMapperFactory> overriddenFactories) {
-        this(type, "", overriddenFactories);
-    }
-
-    public CustomMapper(Class<T> type, String appendText, List<FieldMapperFactory> overriddenFactories) {
+    public CustomMapper(Class<T> type) {
         this.type = type;
-        this.appendText = appendText;
         for (Field field : getFields(type)) {
             ColumnName annotation = field.getAnnotation(ColumnName.class);
             String name = nonNull(annotation) ? annotation.value().toLowerCase() : field.getName().toLowerCase();
             fields.put(name, field);
         }
+    }
+
+    public CustomMapper(Class<T> type, List<FieldMapperFactory> overriddenFactories) {
+        this(type);
         this.factories.addAll(overriddenFactories);
         this.factories.addAll(new FieldMapperFactories().getValues());
+    }
+
+    public CustomMapper(Class<T> type, String appendText, List<FieldMapperFactory> overriddenFactories) {
+        this(type, overriddenFactories);
+        this.appendText = appendText;
     }
 
     private List<Field> getFields(Class<?> type) {
