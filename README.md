@@ -40,7 +40,7 @@ Example:
           private Integer movieId;
       }
 
-If you see annotation we have specified value for "name". It's used to identify fields from the result set. We can use single query to fetch all these information. Just instantiate default folder.
+We need to say which fields are primary keys by the annotation @PrimaryKey. This will be used for folding the objects.  If you see annotation we have specified value for "name". It's used to identify fields from the result set. We can use single query to fetch all these information. Just instantiate default folder.
 
     GenericFolder folder = new GenericFolder(Movie.class);
 
