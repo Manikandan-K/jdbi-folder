@@ -8,4 +8,6 @@ create table musician (id numeric not null, name varchar not null);
 create table album (id numeric not null, name varchar not null, musician_id numeric);
 create table team (id numeric not null, name varchar not null, average numeric);
 
+create table primitive(intField integer, floatField numeric, doubleField numeric, booleanField boolean, longField numeric,intObjectField integer, floatObjectField numeric, doubleObjectField numeric, booleanObjectField boolean, longObjectField numeric );
+
 

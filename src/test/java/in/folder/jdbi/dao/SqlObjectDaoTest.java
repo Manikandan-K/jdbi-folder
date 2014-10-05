@@ -1,16 +1,21 @@
 package in.folder.jdbi.dao;
 
 import in.folder.jdbi.DaoTest;
+import in.folder.jdbi.mapper.CustomMapper;
 import in.folder.jdbi.model.Movie;
 import in.folder.jdbi.model.Song;
 import in.folder.jdbi.model.Team;
+import in.folder.jdbi.model.primitiveBean;
 import org.junit.Before;
 import org.junit.Test;
+import org.skife.jdbi.v2.Query;
 
 import java.math.BigDecimal;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.*;
+
 
 public class SqlObjectDaoTest extends DaoTest {
     private SqlObjectDao dao;
@@ -66,5 +71,25 @@ public class SqlObjectDaoTest extends DaoTest {
 
         assertEquals(1, teams.size());
         assertEquals(BigDecimal.TEN, teams.get(0).getAverage());
+    }
+
+    @Test
+    public void shouldMapNullValueDefaultValueIfTypeIsPrimitive() throws Exception {
+        handle.execute(" insert into primitive values(?,?,?,?,?,?,?,?,?,?)", null, null,null, null,null, null,null, null,null, null);
+        Query<primitiveBean> map = handle.createQuery("select * from primitive")
+                .map(new CustomMapper(primitiveBean.class));
+
+        primitiveBean result = map.first();
+
+        assertSame(0, result.getIntField());
+        assertThat(result.getFloatField(), is(0.0f));
+        assertThat(result.getDoubleField(), is(0.0d));
+        assertThat(result.getLongField(), is(0l));
+        assertFalse(result.isBooleanField());
+        assertNull(result.getIntObjectField());
+        assertNull(result.getFloatObjectField());
+        assertNull(result.getDoubleObjectField());
+        assertNull(result.getLongObjectField());
+        assertNull(result.getBooleanObjectField());
     }
 }

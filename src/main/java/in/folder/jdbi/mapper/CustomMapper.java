@@ -20,16 +20,17 @@ public class CustomMapper<T> implements ResultSetMapper<T>
     private List<FieldMapperFactory> factories = new ArrayList<>();
 
     public CustomMapper(Class<T> type) {
+        this(type, new ArrayList<>());
+    }
+
+    public CustomMapper(Class<T> type, List<FieldMapperFactory> overriddenFactories) {
         this.type = type;
         for (Field field : getFields(type)) {
             ColumnName annotation = field.getAnnotation(ColumnName.class);
             String name = nonNull(annotation) ? annotation.value().toLowerCase() : field.getName().toLowerCase();
             fields.put(name, field);
         }
-    }
 
-    public CustomMapper(Class<T> type, List<FieldMapperFactory> overriddenFactories) {
-        this(type);
         this.factories.addAll(overriddenFactories);
         this.factories.addAll(new FieldMapperFactories().getValues());
     }
@@ -71,29 +72,13 @@ public class CustomMapper<T> implements ResultSetMapper<T>
 
             if (field != null) {
                 Class type = field.getType();
-
                 Object value = null;
-                Boolean assigned = false;
 
-                for (FieldMapperFactory defaultFactory : factories) {
-                    if(defaultFactory.accepts(type)) {
-                        value = defaultFactory.getValue(rs, index);
-                        assigned = true;
+                for (FieldMapperFactory factory : factories) {
+                    if(factory.accepts(type)) {
+                        value = factory.getValue(rs, index, type);
                         break;
                     }
-                }
-
-                if(!assigned) {
-                    if (type.isEnum() && !assigned) {
-                        value = Enum.valueOf(type, rs.getString(index));
-                    }
-                    else {
-                        value = rs.getObject(index);
-                    }
-                }
-
-                if (rs.wasNull() && !type.isPrimitive()) {
-                    value = null;
                 }
 
                 FieldHelper.set(field, object, value);

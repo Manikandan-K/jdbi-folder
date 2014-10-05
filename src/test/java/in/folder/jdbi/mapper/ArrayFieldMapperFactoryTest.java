@@ -15,6 +15,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -54,16 +55,16 @@ public class ArrayFieldMapperFactoryTest {
     }
 
     @Test
-    public void shouldGiveEmptyArrayWhenNoValueIsPresent() throws Exception {
+    public void shouldReturnNullWhenNoValueIsPresent() throws Exception {
         when(resultSetMetaData.getColumnCount()).thenReturn(1);
         when(resultSetMetaData.getColumnLabel(1)).thenReturn("intArray");
         when(resultSet.getMetaData()).thenReturn(resultSetMetaData);
         doReturn(null).when(resultSet).getArray(1);
+        doReturn(true).when(resultSet).wasNull();
 
         SampleArrayBean sampleArrayBean = mapper.map(0, resultSet, ctx);
 
-        int[] intArray = sampleArrayBean.getIntArray();
-        assertSame(0, intArray.length);
+        assertNull(sampleArrayBean.getIntArray());
     }
 
     @Test

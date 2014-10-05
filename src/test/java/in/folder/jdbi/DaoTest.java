@@ -25,6 +25,7 @@ public class DaoTest {
         handle.execute("delete from musician");
         handle.execute("delete from album");
         handle.execute("delete from team");
+        handle.execute("delete from primitive");
     }
 
     protected void insert(Movie... movies) {

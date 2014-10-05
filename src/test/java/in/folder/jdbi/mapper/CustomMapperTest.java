@@ -1,6 +1,7 @@
 package in.folder.jdbi.mapper;
 
 import in.folder.jdbi.annotations.ColumnName;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -90,7 +91,6 @@ public class CustomMapperTest {
 
     @Test
     public void shouldSetValuesOnAllFieldAccessTypes() throws Exception {
-
         when(resultSetMetaData.getColumnCount()).thenReturn(4);
         when(resultSetMetaData.getColumnLabel(1)).thenReturn("longField");
         when(resultSetMetaData.getColumnLabel(2)).thenReturn("stringField");
@@ -159,8 +159,32 @@ public class CustomMapperTest {
 
         assertSame(beanString, sampleBean.getStringField());
         assertSame(superString, sampleBean.getSuperString());
-
     }
+
+    @Test
+    public void shouldMapEnumValues() throws Exception {
+        when(resultSetMetaData.getColumnCount()).thenReturn(1);
+        when(resultSetMetaData.getColumnLabel(1)).thenReturn("enumField");
+
+        when(resultSet.getMetaData()).thenReturn(resultSetMetaData);
+        when(resultSet.getString(1)).thenReturn("ONE");
+        SampleBean sampleBean = mapper.map(0, resultSet, ctx);
+
+        assertSame(ENUM.ONE, sampleBean.getEnumField());
+    }
+
+    @Test
+    public void shouldMapNullEnumValues() throws Exception {
+        when(resultSetMetaData.getColumnCount()).thenReturn(1);
+        when(resultSetMetaData.getColumnLabel(1)).thenReturn("enumField");
+
+        when(resultSet.getMetaData()).thenReturn(resultSetMetaData);
+        when(resultSet.getString(1)).thenReturn(null);
+        SampleBean sampleBean = mapper.map(0, resultSet, ctx);
+
+        assertNull(sampleBean.getEnumField());
+    }
+
 }
 
 
@@ -173,10 +197,19 @@ class SampleBean extends SuperClassBean{
     BigDecimal bigDecimalField;
     @ColumnName("columnName")
     private String column;
+    private ENUM enumField;
 }
 
 @Getter
 class SuperClassBean {
     private String superString;
 }
+
+@Getter
+@AllArgsConstructor
+enum ENUM {
+    ONE("one"), TWO("two");
+    private String name;
+}
+
 
