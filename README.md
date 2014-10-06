@@ -76,25 +76,25 @@ Mapper:
   
     dbi.registerMapper(new CustomMapperFactory(Product.class));
     
-  By default, this mapper will be used for all the classes unless we specify some classes in the excluded list like we did above. And also if we want have any special case while mapping fields, we can do that also. We need to implement FieldMapperFactory<T>. Lets say we want to have the precison of all BigDecimal to 5.
+  By default, this mapper will be used for all the classes unless we specify some classes in the excluded list like we did above. And also if we want have any special case while mapping fields, we can do that also. We need to implement FieldMapperFactory<T>. Lets say we have wrapper object called Money which has currency value.
   
-    public class BigDecimalMapperFactory implements FieldMapperFactory<BigDecimal>{
+    public class MoneyMapperFactory implements FieldMapperFactory<Money>{
   
       @Override
-      public BigDecimal getValue(ResultSet rs, int index) throws SQLException {
-          return rs.getBigDecimal(index).setScale(5, RoundingMode.UP);
+      public Money getValue(ResultSet rs, int index) throws SQLException {
+          return new Money(rs.getBigDecimal(index));
       }
   
       @Override
       public Boolean accepts(Class<?> type) {
-          return type.isAssignableFrom(BigDecimal.class);
+          return type.isAssignableFrom(Money.class);
       }
     }
 
-We just need to register this class to CustomMapperFactory.
+We just need to register this class to CustomMapperFactory. It will take care of converting value to Money Object.
 
     CustomMapperFactory customMapperFactory = new CustomMapperFactory();
-    customMapperFactory.register( new BigDecimalMapperFactory());
+    customMapperFactory.register( new MoneyMapperFactory());
     dbi.registerMapper(customMapperFactory);
 
 We can extend this to handle JSON objects and other complex types.
