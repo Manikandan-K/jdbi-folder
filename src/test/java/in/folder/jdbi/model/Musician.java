@@ -17,6 +17,6 @@ public class Musician {
     @PrimaryKey
     private Integer id ;
     private String name;
-    @OneToMany(name="album", type=Album.class)
+    @OneToMany(name="album")
     private List<Album> albums;
 }

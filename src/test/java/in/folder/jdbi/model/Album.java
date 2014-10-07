@@ -19,6 +19,6 @@ public class Album {
     private String name;
     private Integer musicianId;
 
-    @OneToMany(name = "song", type = Song.class)
+    @OneToMany(name = "song")
     private List<Song> songs;
 }

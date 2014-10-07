@@ -3,6 +3,7 @@ package in.folder.jdbi;
 import in.folder.jdbi.annotations.OneToMany;
 import in.folder.jdbi.annotations.OneToOne;
 import in.folder.jdbi.annotations.PrimaryKey;
+import in.folder.jdbi.helper.FieldHelper;
 
 import java.lang.reflect.Field;
 import java.util.Map;
@@ -46,9 +47,8 @@ public class AnnotatedFieldFactory {
 
     private static AnnotatedField createForOneToMany(Field field) {
         OneToMany annotation = field.getAnnotation(OneToMany.class);
-
         String name = annotation.name().toLowerCase();
-        return new AnnotatedField(OneToMany.class, field, annotation.type(), name);
+        return new AnnotatedField(OneToMany.class, field, FieldHelper.getParameterisedReturnType(field), name);
     }
 
     private static AnnotatedField createForPrimaryKey(Field field) {

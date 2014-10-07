@@ -18,10 +18,10 @@ public class Movie {
     private Integer movieId;
     private String movieName;
 
-    @OneToMany(name = "song", type = Song.class)
+    @OneToMany(name = "song")
     private List<Song> songs;
 
-    @OneToMany(name = "actor", type = Actor.class)
+    @OneToMany(name = "actor")
     private List<Actor> actors;
 
     @OneToOne(name = "director")
