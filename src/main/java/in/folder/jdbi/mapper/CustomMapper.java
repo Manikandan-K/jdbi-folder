@@ -16,7 +16,6 @@ public class CustomMapper<T> implements ResultSetMapper<T>
 {
     private final Class<T> type;
     private final Map<String, Field> fields = new HashMap<>();
-    private String appendText = "";
     private List<FieldMapperFactory> factories = new ArrayList<>();
 
     public CustomMapper(Class<T> type) {
@@ -24,20 +23,20 @@ public class CustomMapper<T> implements ResultSetMapper<T>
     }
 
     public CustomMapper(Class<T> type, List<FieldMapperFactory> overriddenFactories) {
+        this(type, "", overriddenFactories);
+    }
+
+    public CustomMapper(Class<T> type, String nameSpace, List<FieldMapperFactory> overriddenFactories) {
         this.type = type;
         for (Field field : getFields(type)) {
             ColumnName annotation = field.getAnnotation(ColumnName.class);
             String name = nonNull(annotation) ? annotation.value().toLowerCase() : field.getName().toLowerCase();
-            fields.put(name, field);
+            fields.put(nameSpace+name, field);
         }
 
         this.factories.addAll(overriddenFactories);
         this.factories.addAll(new FieldMapperFactories().getValues());
-    }
 
-    public CustomMapper(Class<T> type, String appendText, List<FieldMapperFactory> overriddenFactories) {
-        this(type, overriddenFactories);
-        this.appendText = appendText;
     }
 
     private List<Field> getFields(Class<?> type) {
@@ -66,7 +65,7 @@ public class CustomMapper<T> implements ResultSetMapper<T>
         ResultSetMetaData metadata = rs.getMetaData();
 
         for (int index = 1; index <= metadata.getColumnCount(); ++index) {
-            String name = metadata.getColumnLabel(index).toLowerCase().replace("_", "").replace(appendText, "");
+            String name = metadata.getColumnLabel(index).toLowerCase().replace("_", "");
 
             Field field = fields.get(name);
 

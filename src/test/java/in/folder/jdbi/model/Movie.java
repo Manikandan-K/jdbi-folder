@@ -1,5 +1,6 @@
 package in.folder.jdbi.model;
 
+import in.folder.jdbi.annotations.ColumnName;
 import in.folder.jdbi.annotations.OneToMany;
 import in.folder.jdbi.annotations.OneToOne;
 import in.folder.jdbi.annotations.PrimaryKey;
@@ -16,6 +17,7 @@ import java.util.List;
 public class Movie {
     @PrimaryKey
     private Integer movieId;
+    @ColumnName("name")
     private String movieName;
 
     @OneToMany(name = "song")
