@@ -3,10 +3,7 @@ package in.folder.jdbi.dao;
 import in.folder.jdbi.DaoTest;
 import in.folder.jdbi.GenericFolder;
 import in.folder.jdbi.mapper.BigDecimalMapperFactory;
-import in.folder.jdbi.model.Actor;
-import in.folder.jdbi.model.Director;
-import in.folder.jdbi.model.Movie;
-import in.folder.jdbi.model.Song;
+import in.folder.jdbi.model.*;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -130,6 +127,26 @@ public class MovieDaoTest extends DaoTest {
         assertEquals("Jeans", movie.getMovieName());
         assertEquals(new Integer(1), movie.getDirector().getDirectorId());
         assertEquals("Shankar", movie.getDirector().getDirectorName());
+    }
+
+    @Test
+    public void shouldGetMovieAlongWithDirectorAndAssistantDirector() throws Exception {
+        Movie jeans = Movie.builder().movieId(1).movieName("Jeans").build();
+        Director shankar = Director.builder().directorId(1).directorName("Shankar").movieId(1).build();
+        AssistantDirector assistantDirector1 = AssistantDirector.builder().id(1).name("Name1").directorId(1).build();
+        AssistantDirector assistantDirector2 = AssistantDirector.builder().id(2).name("Name2").directorId(1).build();
+
+        insert(jeans);
+        insert(shankar);
+        insert(assistantDirector1, assistantDirector2);
+
+        List<Movie> movies = dao.getMovieDirector();
+
+        assertEquals(1, movies.size());
+        Director director = movies.get(0).getDirector();
+        assertEquals("Shankar", director.getDirectorName());
+        assertEquals(new Integer(1), director.getDirectorId());
+        assertEquals(2, director.getAssistantDirectors().size());
     }
 
     @Test

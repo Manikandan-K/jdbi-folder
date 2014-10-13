@@ -66,7 +66,8 @@ public class GenericFolder<T> implements Folder2<List<T>> {
     private void handleOneToOne(ResultSet rs, StatementContext ctx, Object object, String childClassName, AnnotatedField annotatedField) throws SQLException {
         if( isChildRowPresent(rs, resultFieldNames, childClassName) ) {
             Field field = annotatedField.getField();
-            Object nestedObject = annotatedField.getMapper().map(rs.getRow(), rs, ctx);
+            Object alreadyPresentObject = FieldHelper.get(field, object);
+            Object nestedObject = isNull(alreadyPresentObject) ? annotatedField.getMapper().map(rs.getRow(), rs, ctx) : alreadyPresentObject;
             mapRelationObject(rs, ctx, nestedObject, annotatedField.getReturnType());
             FieldHelper.set(field, object, nestedObject);
         }

@@ -10,4 +10,5 @@ create table team (id numeric not null, name varchar not null, average numeric);
 
 create table primitive(intField integer, floatField numeric, doubleField numeric, booleanField boolean, longField numeric,intObjectField integer, floatObjectField numeric, doubleObjectField numeric, booleanObjectField boolean, longObjectField numeric );
 
+create table assistant_director (id numeric not null, name varchar not null, director_id numeric);
 

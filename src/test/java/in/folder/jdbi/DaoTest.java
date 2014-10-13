@@ -70,5 +70,14 @@ public class DaoTest {
         }
     }
 
+    protected void insert(AssistantDirector... assistantDirectors) {
+        for (AssistantDirector assistantDirector : assistantDirectors) {
+            handle.execute("insert into assistant_director(id, name, director_id) values(?,?,?)", assistantDirector.getId(), assistantDirector.getName(), assistantDirector.getDirectorId());
+        }
+
+    }
+
+
+
 
 }

@@ -38,6 +38,13 @@ public abstract class Dao implements GetHandle {
         return getHandle().createQuery(query)
                 .fold(folder.getAccumulator(), folder);
     }
+    public List<Movie> getMovieDirector()  throws Exception {
+        String query = locator.locate("getMovieDirector");
+        GenericFolder<Movie> folder = new GenericFolder<>(Movie.class);
+
+        return getHandle().createQuery(query)
+                .fold(folder.getAccumulator(), folder);
+    }
 
 }
 
