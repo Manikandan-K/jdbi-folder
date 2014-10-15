@@ -42,9 +42,8 @@ public class GenericFolder<T> implements Folder2<List<T>> {
     public List<T> fold(List<T> accumulator, ResultSet rs, StatementContext ctx) throws SQLException {
         processResultSet(rs);
         T object = mapper.map(rs.getRow(), rs, ctx);
-        object =  getAlreadyPresentValue(accumulator, object, type);
+        object =  addObjectToCollectionIfNeeded(accumulator, object, type);
         mapRelationObject(rs, ctx, object, type);
-        accumulator.add(object);
         return accumulator;
     }
 
@@ -79,9 +78,8 @@ public class GenericFolder<T> implements Folder2<List<T>> {
 
         if( isChildRowPresent(rs, resultFieldNames, childClassName) ) {
             Object childObject = annotatedField.getMapper().map(rs.getRow(), rs, ctx);
-            childObject = getAlreadyPresentValue(childObjectList, childObject, annotatedField.getReturnType());
+            childObject = addObjectToCollectionIfNeeded(childObjectList, childObject, annotatedField.getReturnType());
             mapRelationObject(rs, ctx, childObject, annotatedField.getReturnType());
-            childObjectList.add(childObject);
         }
         FieldHelper.set(field, object, childObjectList);
     }
@@ -124,16 +122,21 @@ public class GenericFolder<T> implements Folder2<List<T>> {
         return fieldNames;
     }
 
-    public <M> M getAlreadyPresentValue(Collection<M> collection, M object, Class<?> type){
-        M alreadyPresentObject = getValue(collection, object, type);
-        if(alreadyPresentObject != null) {
-            collection.remove(alreadyPresentObject);
-            return alreadyPresentObject;
+    /*
+        If the object already present in the collection, current object will not be added to the collection.
+        And returns already present object. If the object is not present in the collection and it will be added to the collection
+        and current object will be returned.
+    */
+    public <M> M addObjectToCollectionIfNeeded(Collection<M> collection, M object, Class<?> type){
+        M alreadyPresentObject = getAlreadyPresentValue(collection, object, type);
+        if(isNull(alreadyPresentObject)) {
+            collection.add(object);
+            return object;
         }
-        return object;
+        return alreadyPresentObject;
     }
 
-    private<M> M getValue(Collection<M> collection, M object, Class<?> type) {
+    private<M> M getAlreadyPresentValue(Collection<M> collection, M object, Class<?> type) {
         HashMap<String, Object> filter = new HashMap<>();
         for (AnnotatedField primaryKeyField : fieldsMap.get(type).getPrimaryKeys()) {
             Field field = primaryKeyField.getField();
