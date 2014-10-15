@@ -1,5 +1,6 @@
 package in.folder.jdbi;
 
+import in.folder.jdbi.container.FoldingListContainerFactory;
 import in.folder.jdbi.mapper.BigDecimalMapperFactory;
 import in.folder.jdbi.mapper.CustomMapperFactory;
 import in.folder.jdbi.model.*;
@@ -10,9 +11,10 @@ import org.skife.jdbi.v2.Handle;
 public class DaoTest {
     protected static DBI dbi= new DBI("jdbc:postgresql://localhost:5432/jdbi","postgres","pass");
     static {
-        CustomMapperFactory factory = new CustomMapperFactory(Movie.class);
+        CustomMapperFactory factory = new CustomMapperFactory();
         factory.register(new BigDecimalMapperFactory());
         dbi.registerMapper(factory);
+        dbi.registerContainerFactory(new FoldingListContainerFactory());
     }
     protected static Handle handle = dbi.open();
 

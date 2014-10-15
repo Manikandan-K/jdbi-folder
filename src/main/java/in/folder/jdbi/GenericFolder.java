@@ -113,6 +113,22 @@ public class GenericFolder<T> implements Folder2<List<T>> {
         return childClassNames;
     }
 
+
+//    private Set<String> getNestedClassNames(ResultSet rs) throws SQLException {
+//        ResultSetMetaData metaData = rs.getMetaData();
+//        Set<String> childClassNames = new HashSet<>();
+//
+//        for (int i = 1; i <= metaData.getColumnCount(); i++) {
+//            String name = metaData.getColumnLabel(i).toLowerCase();
+//            String[] split = name.split("\\$");
+//            if(split.length == 2 && !isNull(rs.getObject(name))) {
+//                childClassNames.add(split[0]);
+//            }
+//        }
+//        return childClassNames;
+//    }
+
+
     private List<String> getAllResultFieldNames(ResultSet rs) throws SQLException {
         ResultSetMetaData metaData = rs.getMetaData();
         List<String> fieldNames = new ArrayList<>();

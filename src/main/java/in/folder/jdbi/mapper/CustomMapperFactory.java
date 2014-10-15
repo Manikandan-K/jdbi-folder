@@ -6,14 +6,14 @@ import org.skife.jdbi.v2.tweak.ResultSetMapper;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class CustomMapperFactory implements ResultSetMapperFactory {
 
     private List<Class<?>> excludedTypes = new ArrayList<>();
-    private List<FieldMapperFactory> overriddenFactories = new ArrayList<>();
-    private HashMap<Class<?>, CustomMapper> cache = new HashMap<>();
+    private static List<FieldMapperFactory> overriddenFactories = new ArrayList<>();
+    private static ConcurrentHashMap<String, CustomMapper1> cache = new ConcurrentHashMap<>();
 
     public CustomMapperFactory() {
         excludedTypes.add(Boolean.class);
@@ -41,10 +41,16 @@ public class CustomMapperFactory implements ResultSetMapperFactory {
 
     @Override
     public ResultSetMapper mapperFor(Class type, StatementContext ctx) {
-        if(cache.containsKey(type) )
-            return cache.get(type);
-        CustomMapper mapper = new CustomMapper<>(type, overriddenFactories);
-        cache.put(type, mapper);
+        return mapperFor(type, "");
+    }
+
+    public static CustomMapper1 mapperFor(Class type, String nameSpace) {
+        String key = type.toString() + nameSpace;
+        if( cache.contains(key) ) {
+            return cache.get(key);
+        }
+        CustomMapper1 mapper = new CustomMapper1<>(type, overriddenFactories);
+        cache.put(key, mapper);
         return mapper;
     }
 
