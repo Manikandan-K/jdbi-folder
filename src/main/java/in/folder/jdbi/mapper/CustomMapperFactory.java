@@ -44,12 +44,12 @@ public class CustomMapperFactory implements ResultSetMapperFactory {
         return mapperFor(type, "");
     }
 
-    public static CustomMapper1 mapperFor(Class type, String nameSpace) {
+    public static <M> CustomMapper1<M> mapperFor(Class<M> type, String nameSpace) {
         String key = type.toString() + nameSpace;
         if( cache.contains(key) ) {
             return cache.get(key);
         }
-        CustomMapper1 mapper = new CustomMapper1<>(type, overriddenFactories);
+        CustomMapper1<M> mapper = new CustomMapper1<>(type, overriddenFactories);
         cache.put(key, mapper);
         return mapper;
     }

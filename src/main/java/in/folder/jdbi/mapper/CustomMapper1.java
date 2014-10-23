@@ -120,6 +120,7 @@ public class CustomMapper1<T> implements ResultSetMapper<T>
                 }
             }
         }
+        // Todo: check order of execution.
         for (String nameSpace : instanceMap.keySet()) {
             AnnotatedField1 field = fields.get(nameSpace);
             if(nonNull(field) && nestedClassNames.contains(nameSpace)) {

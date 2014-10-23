@@ -12,12 +12,6 @@ public class FieldWrapper {
     private Field field;
     private String nameSpace;
 
-    //    public FieldWrapper(Field field, Class<?> annotationType) {
-//        this.field = field;
-//        this.annotationType = annotationType;
-//        this.classType = annotationType.equals(OneToOne.class) ? field.getType() : FieldHelper.getParameterisedReturnType(field);
-//    }
-//
     public FieldWrapper(Class<?> classType, Field field, String nameSpace) {
         this.classType = classType;
         this.field = field;

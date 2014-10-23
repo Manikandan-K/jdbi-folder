@@ -10,4 +10,4 @@ from movie m
 left join song s   using (movie_id)
 left join actor a  using (movie_id)
 left join director using (movie_id)
-where movie_id = 1
+where movie_id = :movieId
