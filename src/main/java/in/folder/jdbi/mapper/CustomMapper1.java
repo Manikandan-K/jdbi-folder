@@ -21,8 +21,8 @@ import static java.util.Objects.nonNull;
 public class CustomMapper1<T> implements ResultSetMapper<T>
 {
     private final Class<T> type;
-    private Map<String, AnnotatedField1> fields = new HashMap<>();
-    private Map<String, FieldWrapper> innoruMap = new HashMap<>();
+    private Map<String, AnnotatedField1> annotatedFields = new HashMap<>();
+    private Map<String, FieldWrapper> fields = new HashMap<>();
     private List<FieldMapperFactory> factories = new ArrayList<>();
 
     public CustomMapper1(Class<T> type) {
@@ -52,30 +52,30 @@ public class CustomMapper1<T> implements ResultSetMapper<T>
     private void processField(String nameSpace, Field field, Class<?> type) {
         ColumnName annotation = field.getAnnotation(ColumnName.class);
         String name = nonNull(annotation) ? annotation.value() : field.getName();
-        innoruMap.put(getResultSetFieldName(nameSpace, name), new FieldWrapper(type, field, nameSpace));
+        fields.put(getResultSetFieldName(nameSpace, name), new FieldWrapper(type, field, nameSpace));
     }
 
     private FieldWrapper processResultSetName(String resultSetName) {
         String[] strings = resultSetName.split("\\$");
 
         if(strings.length ==1) {
-            return innoruMap.get(resultSetName.replace("_", ""));
+            return fields.get(resultSetName.replace("_", ""));
         }else {
             String nameSpace = strings[0];
             String nameWithoutUnderscore = strings[1].replace("-", "");
-            return innoruMap.get(nameSpace + "$" + nameWithoutUnderscore);
+            return fields.get(nameSpace + "$" + nameWithoutUnderscore);
         }
     }
 
     private void processOneToManyFields(Field field) {
         String nameSpace = field.getAnnotation(OneToMany.class).name();
-        fields.put(nameSpace, new AnnotatedField1(field, OneToMany.class));
+        annotatedFields.put(nameSpace, new AnnotatedField1(field, OneToMany.class));
         processFields(FieldHelper.getParameterisedReturnType(field), nameSpace);
     }
 
     private void processOneToOneFields(Field field) {
         String nameSpace = field.getAnnotation(OneToOne.class).name();
-        fields.put(nameSpace, new AnnotatedField1(field, OneToOne.class));
+        annotatedFields.put(nameSpace, new AnnotatedField1(field, OneToOne.class));
         processFields(field.getType(), nameSpace);
     }
 
@@ -122,7 +122,7 @@ public class CustomMapper1<T> implements ResultSetMapper<T>
         }
         // Todo: check order of execution.
         for (String nameSpace : instanceMap.keySet()) {
-            AnnotatedField1 field = fields.get(nameSpace);
+            AnnotatedField1 field = annotatedFields.get(nameSpace);
             if(nonNull(field) && nestedClassNames.contains(nameSpace)) {
                 field.set(object, instanceMap.get(nameSpace));
             }

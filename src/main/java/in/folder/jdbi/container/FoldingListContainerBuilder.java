@@ -6,9 +6,7 @@ import in.folder.jdbi.mapper.AnnotatedFields1;
 import org.skife.jdbi.v2.ContainerBuilder;
 
 import java.lang.reflect.Field;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static com.hyphen.Hyphen.where;
 import static in.folder.jdbi.helper.FieldHelper.get;
@@ -16,30 +14,23 @@ import static java.util.Objects.isNull;
 
 public class FoldingListContainerBuilder implements ContainerBuilder<FoldingList<?>>{
 
-    private final FoldingList<Object> list;
+    private final List<Object> list;
     private Map<Class<?>, AnnotatedFields1> fieldsMap = new HashMap<>();
 
     public FoldingListContainerBuilder() {
-        this.list = new FoldingList<>();
+        this.list = new ArrayList<>();
     }
 
     @Override
     public ContainerBuilder<FoldingList<?>> add(Object currentObject) {
         fieldsMap = AnnotatedFieldFactory1.get(currentObject.getClass());
-
-        Object alreadyPresentValue = getAlreadyPresentValue(list.getValues(), currentObject);
-
-        if( isNull(alreadyPresentValue) ) {
-            list.add(currentObject);
-        }else {
-            mergeObject(alreadyPresentValue, currentObject);
-        }
+        mergeCollection(list, currentObject);
         return this;
     }
 
     @Override
     public FoldingList<?> build() {
-        return list;
+        return new FoldingList<>(list);
     }
 
     private void mergeObject(Object oldObject, Object newObject) {
@@ -49,30 +40,34 @@ public class FoldingListContainerBuilder implements ContainerBuilder<FoldingList
         AnnotatedFields1 annotatedFields = fieldsMap.get(oldObject.getClass());
 
         for (AnnotatedField1 annotatedField : annotatedFields.get()) {
+            Object oldValue = get(annotatedField.getField(), oldObject);
+            Object newValue = get(annotatedField.getField(), newObject);
             if(annotatedField.isOneToOne()) {
-                mergeObject(get(annotatedField.getField(), oldObject), get(annotatedField.getField(), newObject));
+                mergeObject(oldValue, newValue);
             }else if(annotatedField.isOneToMany()) {
-                handleOneToMany(oldObject, newObject, annotatedField.getField());
+                handleOneToMany(oldValue, newValue);
             }
         }
     }
 
-    private void handleOneToMany(Object oldObject, Object newObject, Field field) {
-        Object oldValue = get(field, oldObject);
-        Object newValue = get(field, newObject);
+    private void handleOneToMany(Object oldObject, Object newObject) {
+        if (oldObject instanceof Collection && newObject instanceof Collection) {
+            Collection<Object> oldCollection = (Collection<Object>) oldObject;
+            Collection<Object> newCollection = (Collection<Object>) newObject;
 
-        if(oldValue instanceof Collection && newValue instanceof Collection) {
-            Collection<Object> oldCollection = (Collection<Object>) oldValue;
-            Collection<Object> newCollection = (Collection<Object>) newValue;
-
-            Object currentObject = newCollection.iterator().next();
-            Object alreadyPresentValue = getAlreadyPresentValue(oldCollection, currentObject);
-
-            if( isNull(alreadyPresentValue) ) {
-                oldCollection.add(currentObject);
-            }else {
-                mergeObject(alreadyPresentValue, currentObject);
+            if (newCollection.iterator().hasNext()) {
+                mergeCollection(oldCollection, newCollection.iterator().next());
             }
+        }
+    }
+
+    private void mergeCollection(Collection<Object> collection, Object currentObject) {
+        Object alreadyPresentValue = getAlreadyPresentValue(collection, currentObject);
+
+        if( isNull(alreadyPresentValue) ) {
+            collection.add(currentObject);
+        }else {
+            mergeObject(alreadyPresentValue, currentObject);
         }
     }
 

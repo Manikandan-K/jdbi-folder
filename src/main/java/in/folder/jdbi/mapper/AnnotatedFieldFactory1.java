@@ -36,27 +36,16 @@ public class AnnotatedFieldFactory1 {
 
     public static AnnotatedField1 create(Field field) {
         AnnotatedField1 annotatedField = null;
+
         if(field.isAnnotationPresent(OneToOne.class)) {
-            annotatedField = createForOneToOne(field);
+            annotatedField = new AnnotatedField1(field, OneToOne.class, field.getType());
         } else if(field.isAnnotationPresent(OneToMany.class)) {
-            annotatedField = createForOneToMany(field);
+            annotatedField = new AnnotatedField1(field, OneToMany.class, getParameterisedReturnType(field));
         }else if(field.isAnnotationPresent(PrimaryKey.class)) {
-            annotatedField = createForPrimaryKey(field);
+            annotatedField = new AnnotatedField1(field, PrimaryKey.class, field.getType());
         }
 
         return annotatedField;
-    }
-
-    private static AnnotatedField1 createForOneToOne(Field field) {
-        return new AnnotatedField1(field, OneToOne.class, field.getType());
-    }
-
-    private static AnnotatedField1 createForOneToMany(Field field) {
-        return new AnnotatedField1(field, OneToMany.class, getParameterisedReturnType(field));
-    }
-
-    private static AnnotatedField1 createForPrimaryKey(Field field) {
-        return new AnnotatedField1(field, PrimaryKey.class, field.getType());
     }
 
 }

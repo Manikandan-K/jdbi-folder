@@ -2,12 +2,8 @@ package in.folder.jdbi.dao;
 
 import in.folder.jdbi.DaoTest;
 import in.folder.jdbi.GenericFolder;
-import in.folder.jdbi.container.FoldingList;
 import in.folder.jdbi.mapper.BigDecimalMapperFactory;
-import in.folder.jdbi.model.Actor;
-import in.folder.jdbi.model.Director;
-import in.folder.jdbi.model.Movie;
-import in.folder.jdbi.model.Song;
+import in.folder.jdbi.model.*;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -18,7 +14,6 @@ import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 public class SqlObjectFolderTest extends DaoTest {
@@ -148,5 +143,79 @@ public class SqlObjectFolderTest extends DaoTest {
 
         assertEquals(BigDecimal.TEN, movie.getRatings());
     }
+
+    @Test
+    @Ignore("Will be fixed after handling multi level")
+    public void shouldGetMusicianAlongWithAlbumAndSongs() throws Exception {
+        dataSetupForRahman();
+
+        List<Musician> musicians = dao.getMusician().getValues();
+
+        assertEquals(1, musicians.size());
+        Musician musician = musicians.get(0);
+        List<Album> albums = musician.getAlbums();
+        assertEquals(2, albums.size());
+        assertEquals("Roja", albums.get(0).getName());
+        List<Song> songs1 = albums.get(0).getSongs();
+        assertEquals(2, songs1.size());
+        assertEquals("Kadhal Rojave", songs1.get(0).getSongName());
+        assertEquals("Pudhu Vellai", songs1.get(1).getSongName());
+        List<Song> songs2 = albums.get(1).getSongs();
+        assertEquals(2, songs2.size());
+        assertEquals("Kannalane", songs2.get(0).getSongName());
+        assertEquals("Uyire", songs2.get(1).getSongName());
+    }
+
+    @Test
+    @Ignore("Will be fixed after handling multi level")
+    public void shouldGetMultipleMusicians() throws Exception {
+        dataSetupForRahman();
+        dataSetupForIlayaraja();
+
+        List<Musician> musicians = dao.getMusician().getValues();
+
+        assertEquals(2, musicians.size());
+        Musician rahman = musicians.get(0);
+        assertEquals(2, rahman.getAlbums().size());
+        assertEquals(2, rahman.getAlbums().get(0).getSongs().size());
+        assertEquals(2, rahman.getAlbums().get(1).getSongs().size());
+        Musician ilayaRaja = musicians.get(1);
+        assertEquals(2, ilayaRaja.getAlbums().size());
+        assertEquals(1, ilayaRaja.getAlbums().get(0).getSongs().size());
+        assertEquals(2, ilayaRaja.getAlbums().get(1).getSongs().size());
+
+    }
+
+    private void dataSetupForRahman() {
+        Musician rahman = Musician.builder().id(1).name("Rahman").build();
+
+        Album roja = Album.builder().id(1).name("Roja").musicianId(1).build();
+        Song song1 = Song.builder().songId(1).songName("Kadhal Rojave").albumId(1).build();
+        Song song2 = Song.builder().songId(2).songName("Pudhu Vellai").albumId(1).build();
+
+        Album bombay = Album.builder().id(2).name("Bombay").musicianId(1).build();
+        Song song3 = Song.builder().songId(3).songName("Kannalane").albumId(2).build();
+        Song song4 = Song.builder().songId(4).songName("Uyire").albumId(2).build();
+
+        insert(rahman);
+        insert(roja, bombay);
+        insert(song1, song2, song3, song4);
+    }
+
+    private void dataSetupForIlayaraja() {
+        Musician ilayaraja = Musician.builder().id(2).name("Ilayaraja").build();
+
+        Album roja = Album.builder().id(3).name("16 vayathinile").musicianId(2).build();
+        Song song1 = Song.builder().songId(5).songName("Senthoora poove").albumId(3).build();
+
+        Album bombay = Album.builder().id(4).name("Mullum Malarum").musicianId(2).build();
+        Song song2 = Song.builder().songId(6).songName("Senthalam poovil").albumId(4).build();
+        Song song3 = Song.builder().songId(7).songName("Nitham nitham").albumId(4).build();
+
+        insert(ilayaraja);
+        insert(roja, bombay);
+        insert(song1, song2, song3);
+    }
+
 
 }
