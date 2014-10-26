@@ -1,15 +1,10 @@
 package in.folder.jdbi.mapper;
 
 
-import in.folder.jdbi.annotations.ColumnName;
-import in.folder.jdbi.annotations.OneToMany;
-import in.folder.jdbi.annotations.OneToOne;
-import in.folder.jdbi.helper.FieldHelper;
 import in.folder.jdbi.helper.FieldWrapper;
 import org.skife.jdbi.v2.StatementContext;
 import org.skife.jdbi.v2.tweak.ResultSetMapper;
 
-import java.lang.reflect.Field;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -21,9 +16,9 @@ import static java.util.Objects.nonNull;
 public class CustomMapper1<T> implements ResultSetMapper<T>
 {
     private final Class<T> type;
-    private Map<String, AnnotatedField1> annotatedFields = new HashMap<>();
     private Map<String, FieldWrapper> fields = new HashMap<>();
     private List<FieldMapperFactory> factories = new ArrayList<>();
+    private Map<Class<?>, AnnotatedFields1> annotatedFieldsMap;
 
     public CustomMapper1(Class<T> type) {
         this(type, new ArrayList<>());
@@ -33,26 +28,9 @@ public class CustomMapper1<T> implements ResultSetMapper<T>
         this.type = type;
         this.factories.addAll(overriddenFactories);
         this.factories.addAll(new FieldMapperFactories().getValues());
-        processFields(type, "");
+        this.fields = AnnotatedFieldFactory1.getFields(type);
+        annotatedFieldsMap = AnnotatedFieldFactory1.get(type);
 
-    }
-
-    private void processFields(Class<?> type, String nameSpace) {
-        for (Field field : getFields(type)) {
-            if(field.isAnnotationPresent(OneToOne.class) ) {
-                processOneToOneFields(field);
-            }else if(field.isAnnotationPresent(OneToMany.class) ) {
-                processOneToManyFields(field);
-            }else {
-                processField(nameSpace, field, type);
-            }
-        }
-    }
-
-    private void processField(String nameSpace, Field field, Class<?> type) {
-        ColumnName annotation = field.getAnnotation(ColumnName.class);
-        String name = nonNull(annotation) ? annotation.value() : field.getName();
-        fields.put(getResultSetFieldName(nameSpace, name), new FieldWrapper(type, field, nameSpace));
     }
 
     private FieldWrapper processResultSetName(String resultSetName) {
@@ -65,33 +43,6 @@ public class CustomMapper1<T> implements ResultSetMapper<T>
             String nameWithoutUnderscore = strings[1].replace("-", "");
             return fields.get(nameSpace + "$" + nameWithoutUnderscore);
         }
-    }
-
-    private void processOneToManyFields(Field field) {
-        String nameSpace = field.getAnnotation(OneToMany.class).name();
-        annotatedFields.put(nameSpace, new AnnotatedField1(field, OneToMany.class));
-        processFields(FieldHelper.getParameterisedReturnType(field), nameSpace);
-    }
-
-    private void processOneToOneFields(Field field) {
-        String nameSpace = field.getAnnotation(OneToOne.class).name();
-        annotatedFields.put(nameSpace, new AnnotatedField1(field, OneToOne.class));
-        processFields(field.getType(), nameSpace);
-    }
-
-    private String getResultSetFieldName(String nameSpace, String name) {
-        String nameWithoutUnderscore = name.toLowerCase().replace("_", "");
-        return nameSpace.isEmpty() ? nameWithoutUnderscore :  nameSpace.toLowerCase() + "$" + nameWithoutUnderscore;
-    }
-
-    private List<Field> getFields(Class<?> type) {
-        List<Field> result = new ArrayList<>();
-        Class<?> clazz = type;
-        while(clazz.getSuperclass() != null) {
-            result.addAll(Arrays.asList(clazz.getDeclaredFields()));
-            clazz = clazz.getSuperclass();
-        }
-        return result;
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -120,15 +71,19 @@ public class CustomMapper1<T> implements ResultSetMapper<T>
                 }
             }
         }
-        // Todo: check order of execution.
-        for (String nameSpace : instanceMap.keySet()) {
-            AnnotatedField1 field = annotatedFields.get(nameSpace);
-            if(nonNull(field) && nestedClassNames.contains(nameSpace)) {
-                field.set(object, instanceMap.get(nameSpace));
+        anotherMethod(object, type, nestedClassNames, instanceMap);
+        return object;
+    }
+
+    private void anotherMethod(Object object, Class<?> type, Set<String> nestedClassNames,Map<String, Object> instanceMap) {
+        AnnotatedFields1 annotatedFields = annotatedFieldsMap.get(type);
+
+        for (AnnotatedField1 field : annotatedFields.get()) {
+            if(nestedClassNames.contains(field.getNameSpace()) && instanceMap.containsKey(field.getNameSpace()) ) {
+                field.set(object, instanceMap.get(field.getNameSpace()));
             }
         }
 
-        return object;
     }
 
     private Set<String> getNestedClassNames(ResultSet rs) throws SQLException {

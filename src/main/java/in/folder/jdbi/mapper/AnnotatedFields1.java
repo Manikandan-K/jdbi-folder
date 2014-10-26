@@ -8,10 +8,6 @@ public class AnnotatedFields1 {
     private List<AnnotatedField1> values = new ArrayList<>();
     private List<AnnotatedField1> primaryKeys = new ArrayList<>();
 
-//    public AnnotatedField1 get(String key) {
-//        return values.get(key);
-//    }
-
     public List<AnnotatedField1> get() {
         return values;
     }

@@ -12,15 +12,14 @@ public class AnnotatedField1 {
     private Field field;
     private Class<?> type;
     private Class<?> returnType;
+    private String nameSpace;
 
-    public AnnotatedField1(Field field, Class<?> type) {
-        this.field = field;
-        this.type = type;
-    }
 
     public AnnotatedField1(Field field, Class<?> type, Class<?> returnType) {
-        this(field, type);
+        this.field = field;
+        this.type = type;
         this.returnType = returnType;
+        this.nameSpace = nameSpace();
     }
 
     public void set(Object object, Object value) {
@@ -54,6 +53,20 @@ public class AnnotatedField1 {
 
     public Boolean isNestedField() {
         return isOneToMany() || isOneToOne();
+    }
+
+    private String nameSpace() {
+        String nameSpace = null ;
+        if(isOneToMany()) {
+            nameSpace =  field.getAnnotation(OneToMany.class).name();
+        }else if(isOneToOne()) {
+            nameSpace = field.getAnnotation(OneToOne.class).name();
+        }
+        return nameSpace ;
+    }
+
+    public String getNameSpace() {
+        return nameSpace;
     }
 
     public Class<?> getReturnType() {
