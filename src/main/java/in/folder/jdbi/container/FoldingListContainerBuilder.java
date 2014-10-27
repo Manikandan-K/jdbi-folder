@@ -39,7 +39,7 @@ public class FoldingListContainerBuilder implements ContainerBuilder<FoldingList
 
         AnnotatedFields1 annotatedFields = fieldsMap.get(oldObject.getClass());
 
-        for (AnnotatedField1 annotatedField : annotatedFields.get()) {
+        for (AnnotatedField1 annotatedField : annotatedFields.values()) {
             Object oldValue = get(annotatedField.getField(), oldObject);
             Object newValue = get(annotatedField.getField(), newObject);
             if(annotatedField.isOneToOne()) {

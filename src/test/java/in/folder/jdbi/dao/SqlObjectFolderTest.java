@@ -55,7 +55,7 @@ public class SqlObjectFolderTest extends DaoTest {
 
 
     @Test
-    @Ignore
+    @Ignore("Empty list for left join")
     public void shouldGetMovieAloneIfThereIsNoSongs() throws Exception {
         Movie jeans = Movie.builder().movieId(1).movieName("Jeans").build();
         insert(jeans);
@@ -145,7 +145,6 @@ public class SqlObjectFolderTest extends DaoTest {
     }
 
     @Test
-    @Ignore("Will be fixed after handling multi level")
     public void shouldGetMusicianAlongWithAlbumAndSongs() throws Exception {
         dataSetupForRahman();
 
@@ -167,7 +166,6 @@ public class SqlObjectFolderTest extends DaoTest {
     }
 
     @Test
-    @Ignore("Will be fixed after handling multi level")
     public void shouldGetMultipleMusicians() throws Exception {
         dataSetupForRahman();
         dataSetupForIlayaraja();

@@ -10,12 +10,10 @@ public class FieldWrapper {
 
     private Class<?> classType;
     private Field field;
-    private String nameSpace;
 
-    public FieldWrapper(Class<?> classType, Field field, String nameSpace) {
+    public FieldWrapper(Class<?> classType, Field field) {
         this.classType = classType;
         this.field = field;
-        this.nameSpace = nameSpace;
     }
 
     public Field getField() {
@@ -26,11 +24,11 @@ public class FieldWrapper {
         return field.getType();
     }
 
-    public void setValue(Object value, HashMap<String, Object> instanceMap) {
-        Object object = instanceMap.get(nameSpace);
+    public void setValue(Object value, HashMap<Class<?>, Object> instanceMap) {
+        Object object = instanceMap.get(classType);
         if(isNull(object)) {
             object = FieldHelper.getInstance(classType);
-            instanceMap.put(nameSpace, object);
+            instanceMap.put(classType, object);
         }
         set(field, object, value);
     }

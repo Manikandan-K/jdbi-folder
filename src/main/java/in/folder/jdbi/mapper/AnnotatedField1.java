@@ -10,22 +10,22 @@ import java.util.*;
 
 public class AnnotatedField1 {
     private Field field;
+    private Class<?> annotationType;
     private Class<?> type;
-    private Class<?> returnType;
     private String nameSpace;
 
 
-    public AnnotatedField1(Field field, Class<?> type, Class<?> returnType) {
+    public AnnotatedField1(Field field, Class<?> annotationType, Class<?> type) {
         this.field = field;
+        this.annotationType = annotationType;
         this.type = type;
-        this.returnType = returnType;
         this.nameSpace = nameSpace();
     }
 
     public void set(Object object, Object value) {
-        if(type.equals(OneToOne.class)) {
+        if(isOneToOne()) {
             FieldHelper.set(field, object, value);
-        }else if(type.equals(OneToMany.class)) {
+        }else if(isOneToMany()) {
             FieldHelper.set(field, object, getContainerValue(value));
         }
     }
@@ -40,15 +40,15 @@ public class AnnotatedField1 {
     }
 
     public Boolean isOneToMany() {
-        return type.equals(OneToMany.class);
+        return annotationType.equals(OneToMany.class);
     }
 
     public Boolean isOneToOne() {
-        return type.equals(OneToOne.class);
+        return annotationType.equals(OneToOne.class);
     }
 
     public Boolean isPrimaryKey() {
-        return type.equals(PrimaryKey.class);
+        return annotationType.equals(PrimaryKey.class);
     }
 
     public Boolean isNestedField() {
@@ -69,8 +69,8 @@ public class AnnotatedField1 {
         return nameSpace;
     }
 
-    public Class<?> getReturnType() {
-        return returnType;
+    public Class<?> getType() {
+        return type;
     }
 
     public Field getField() {
@@ -79,5 +79,9 @@ public class AnnotatedField1 {
 
     public String getName() {
         return field.getName();
+    }
+
+    public Class<?> getDeclaringClass() {
+        return field.getDeclaringClass();
     }
 }

@@ -62,7 +62,7 @@ public class AnnotatedFieldFactory1 {
             AnnotatedField1 annotatedField = create(field);
             annotatedFields.add(annotatedField);
             if(annotatedField != null && annotatedField.isNestedField())  {
-                processFields(annotatedField.getReturnType(), annotatedField.getNameSpace(), fields);
+                processFields(annotatedField.getType(), annotatedField.getNameSpace(), fields);
             }
             processField(fields, nameSpace, field, type);
         }
@@ -72,7 +72,7 @@ public class AnnotatedFieldFactory1 {
     private static void processField(Map<String, FieldWrapper> fields, String nameSpace, Field field, Class<?> type) {
         ColumnName annotation = field.getAnnotation(ColumnName.class);
         String name = nonNull(annotation) ? annotation.value() : field.getName();
-        fields.put(getResultSetFieldName(nameSpace, name), new FieldWrapper(type, field, nameSpace));
+        fields.put(getResultSetFieldName(nameSpace, name), new FieldWrapper(type, field));
     }
 
     private static String getResultSetFieldName(String nameSpace, String name) {

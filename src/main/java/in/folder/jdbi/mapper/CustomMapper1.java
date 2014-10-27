@@ -47,9 +47,9 @@ public class CustomMapper1<T> implements ResultSetMapper<T>
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public T map(int row, ResultSet rs, StatementContext ctx) throws SQLException {
-        HashMap<String, Object> instanceMap = new HashMap<>();
+        HashMap<Class<?>, Object> instanceMap = new HashMap<>();
         T object = getInstance(type);
-        instanceMap.put("", object);
+        instanceMap.put(type, object);
 
         Set<String> nestedClassNames = getNestedClassNames(rs);
 
@@ -71,19 +71,17 @@ public class CustomMapper1<T> implements ResultSetMapper<T>
                 }
             }
         }
-        anotherMethod(object, type, nestedClassNames, instanceMap);
+        setNestedObjects(type, nestedClassNames, instanceMap);
         return object;
     }
 
-    private void anotherMethod(Object object, Class<?> type, Set<String> nestedClassNames,Map<String, Object> instanceMap) {
-        AnnotatedFields1 annotatedFields = annotatedFieldsMap.get(type);
-
-        for (AnnotatedField1 field : annotatedFields.get()) {
-            if(nestedClassNames.contains(field.getNameSpace()) && instanceMap.containsKey(field.getNameSpace()) ) {
-                field.set(object, instanceMap.get(field.getNameSpace()));
+    private void setNestedObjects(Class<?> type, Set<String> nestedClassNames, Map<Class<?>, Object> instanceMap) {
+        for (AnnotatedField1 field : annotatedFieldsMap.get(type).values()) {
+            if(nestedClassNames.contains(field.getNameSpace()) && instanceMap.containsKey(field.getType()) ) {
+                field.set(instanceMap.get(field.getDeclaringClass()), instanceMap.get(field.getType()));
+                setNestedObjects(field.getType(), nestedClassNames, instanceMap);
             }
         }
-
     }
 
     private Set<String> getNestedClassNames(ResultSet rs) throws SQLException {

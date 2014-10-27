@@ -8,7 +8,7 @@ public class AnnotatedFields1 {
     private List<AnnotatedField1> values = new ArrayList<>();
     private List<AnnotatedField1> primaryKeys = new ArrayList<>();
 
-    public List<AnnotatedField1> get() {
+    public List<AnnotatedField1> values() {
         return values;
     }
 
