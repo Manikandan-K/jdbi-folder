@@ -40,7 +40,7 @@ public class CustomMapper1<T> implements ResultSetMapper<T>
             return fields.get(resultSetName.replace("_", ""));
         }else {
             String nameSpace = strings[0];
-            String nameWithoutUnderscore = strings[1].replace("-", "");
+            String nameWithoutUnderscore = strings[1].replace("_", "");
             return fields.get(nameSpace + "$" + nameWithoutUnderscore);
         }
     }
