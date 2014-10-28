@@ -4,7 +4,6 @@ import in.folder.jdbi.annotations.ColumnName;
 import in.folder.jdbi.annotations.OneToMany;
 import in.folder.jdbi.annotations.OneToOne;
 import in.folder.jdbi.annotations.PrimaryKey;
-import in.folder.jdbi.helper.FieldHelper;
 import in.folder.jdbi.helper.FieldWrapper;
 
 import java.lang.reflect.Field;
@@ -12,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static in.folder.jdbi.helper.FieldHelper.getParameterisedReturnType;
+import static in.folder.jdbi.mapper.FieldHelper.getParameterisedReturnType;
 import static java.util.Objects.nonNull;
 
 public class AnnotatedFieldFactory1 {

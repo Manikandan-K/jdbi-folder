@@ -33,7 +33,7 @@ public class CustomMapperTest {
     @Mock
     StatementContext ctx;
 
-    CustomMapper<SampleBean> mapper = new CustomMapper<>(SampleBean.class, new ArrayList<>());
+    CustomMapper1<SampleBean> mapper = new CustomMapper1<>(SampleBean.class, new ArrayList<>());
 
     @Test
     public void shouldSetValueOnPrivateField() throws Exception {
@@ -118,7 +118,6 @@ public class CustomMapperTest {
     }
 
     @Test
-    @Ignore
     public void customMapperFactoryShouldTakeOverriddenMapperFactories() throws Exception {
         when(resultSetMetaData.getColumnCount()).thenReturn(1);
         when(resultSetMetaData.getColumnLabel(1)).thenReturn("bigDecimalField");

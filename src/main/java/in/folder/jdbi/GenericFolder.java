@@ -1,6 +1,6 @@
 package in.folder.jdbi;
 
-import in.folder.jdbi.helper.FieldHelper;
+import in.folder.jdbi.mapper.FieldHelper;
 import in.folder.jdbi.mapper.CustomMapper;
 import in.folder.jdbi.mapper.FieldMapperFactory;
 import org.skife.jdbi.v2.Folder2;

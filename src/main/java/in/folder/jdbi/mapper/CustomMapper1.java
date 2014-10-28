@@ -10,7 +10,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.*;
 
-import static in.folder.jdbi.helper.FieldHelper.getInstance;
+import static in.folder.jdbi.mapper.FieldHelper.getInstance;
 import static java.util.Objects.nonNull;
 
 public class CustomMapper1<T> implements ResultSetMapper<T>

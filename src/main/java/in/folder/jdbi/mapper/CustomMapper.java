@@ -2,7 +2,6 @@ package in.folder.jdbi.mapper;
 
 
 import in.folder.jdbi.annotations.ColumnName;
-import in.folder.jdbi.helper.FieldHelper;
 import org.skife.jdbi.v2.StatementContext;
 import org.skife.jdbi.v2.tweak.ResultSetMapper;
 

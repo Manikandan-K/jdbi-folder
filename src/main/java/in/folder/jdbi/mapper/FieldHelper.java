@@ -1,4 +1,4 @@
-package in.folder.jdbi.helper;
+package in.folder.jdbi.mapper;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;

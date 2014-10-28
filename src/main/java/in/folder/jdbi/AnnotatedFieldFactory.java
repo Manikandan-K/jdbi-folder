@@ -3,12 +3,12 @@ package in.folder.jdbi;
 import in.folder.jdbi.annotations.OneToMany;
 import in.folder.jdbi.annotations.OneToOne;
 import in.folder.jdbi.annotations.PrimaryKey;
-import in.folder.jdbi.helper.FieldHelper;
+import in.folder.jdbi.mapper.FieldHelper;
 
 import java.lang.reflect.Field;
 import java.util.Map;
 
-import static in.folder.jdbi.helper.FieldHelper.getFields;
+import static in.folder.jdbi.mapper.FieldHelper.getFields;
 
 
 public class AnnotatedFieldFactory {

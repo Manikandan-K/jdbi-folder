@@ -1,9 +1,11 @@
 package in.folder.jdbi.helper;
 
+import in.folder.jdbi.mapper.FieldHelper;
+
 import java.lang.reflect.Field;
 import java.util.HashMap;
 
-import static in.folder.jdbi.helper.FieldHelper.set;
+import static in.folder.jdbi.mapper.FieldHelper.set;
 import static java.util.Objects.isNull;
 
 public class FieldWrapper {

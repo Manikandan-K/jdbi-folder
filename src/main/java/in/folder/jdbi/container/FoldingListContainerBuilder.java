@@ -9,7 +9,7 @@ import java.lang.reflect.Field;
 import java.util.*;
 
 import static com.hyphen.Hyphen.where;
-import static in.folder.jdbi.helper.FieldHelper.get;
+import static in.folder.jdbi.mapper.FieldHelper.get;
 import static java.util.Objects.isNull;
 
 public class FoldingListContainerBuilder implements ContainerBuilder<FoldingList<?>>{

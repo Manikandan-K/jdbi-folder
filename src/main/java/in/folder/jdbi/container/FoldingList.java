@@ -1,5 +1,6 @@
 package in.folder.jdbi.container;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -9,6 +10,9 @@ public class FoldingList<T> implements Iterable<T>{
 
     public FoldingList(List<T> list) {
         this.list = list;
+    }
+    public FoldingList() {
+        this.list = new ArrayList<>();
     }
 
     @Override
