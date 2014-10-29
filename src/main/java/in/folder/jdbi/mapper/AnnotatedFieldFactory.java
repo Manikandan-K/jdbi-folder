@@ -14,12 +14,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import static in.folder.jdbi.mapper.FieldHelper.getParameterisedReturnType;
 import static java.util.Objects.nonNull;
 
-public class AnnotatedFieldFactory1 {
+public class AnnotatedFieldFactory {
 
-    private static ConcurrentHashMap<Class<?>, AnnotatedFields1> annotatedFieldsMap = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<Class<?>, AnnotatedFields> annotatedFieldsMap = new ConcurrentHashMap<>();
     private static Map<Class<?>, Map<String, FieldWrapper>> fieldsMap = new HashMap<>();
 
-    public static ConcurrentHashMap<Class<?>, AnnotatedFields1> get(Class<?> type) {
+    public static ConcurrentHashMap<Class<?>, AnnotatedFields> get(Class<?> type) {
         if(!annotatedFieldsMap.containsKey(type)) {
             processFields(type);
         }
@@ -40,25 +40,25 @@ public class AnnotatedFieldFactory1 {
         fieldsMap.put(type, fields);
     }
 
-    private static AnnotatedField1 create(Field field) {
-        AnnotatedField1 annotatedField = null;
+    private static AnnotatedField create(Field field) {
+        AnnotatedField annotatedField = null;
 
         if(field.isAnnotationPresent(OneToOne.class)) {
-            annotatedField = new AnnotatedField1(field, OneToOne.class, field.getType());
+            annotatedField = new AnnotatedField(field, OneToOne.class, field.getType());
         } else if(field.isAnnotationPresent(OneToMany.class)) {
-            annotatedField = new AnnotatedField1(field, OneToMany.class, getParameterisedReturnType(field));
+            annotatedField = new AnnotatedField(field, OneToMany.class, getParameterisedReturnType(field));
         }else if(field.isAnnotationPresent(PrimaryKey.class)) {
-            annotatedField = new AnnotatedField1(field, PrimaryKey.class, field.getType());
+            annotatedField = new AnnotatedField(field, PrimaryKey.class, field.getType());
         }
 
         return annotatedField;
     }
 
     private static void processFields(Class<?> type, String nameSpace, Map<String, FieldWrapper> fields) {
-        AnnotatedFields1 annotatedFields = new AnnotatedFields1();
+        AnnotatedFields annotatedFields = new AnnotatedFields();
 
         for (Field field : FieldHelper.getFields(type)) {
-            AnnotatedField1 annotatedField = create(field);
+            AnnotatedField annotatedField = create(field);
             annotatedFields.add(annotatedField);
             if(annotatedField != null && annotatedField.isNestedField())  {
                 processFields(annotatedField.getType(), annotatedField.getNameSpace(), fields);

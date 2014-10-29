@@ -13,10 +13,8 @@ import java.util.List;
 
 public class GenericFolder<T> implements Folder2<List<T>> {
 
-    private ResultSetMapper<T> mapper;
-    private List<T> acc;
-    private static List<FieldMapperFactory> overriddenFactories = new ArrayList<>();
-
+    private final ResultSetMapper<T> mapper;
+    private final List<T> acc;
     private final Folder folder;
 
     public GenericFolder(Class<T> type) {
@@ -34,14 +32,6 @@ public class GenericFolder<T> implements Folder2<List<T>> {
         T object = mapper.map(rs.getRow(), rs, ctx);
         folder.fold(accumulator, object);
         return accumulator;
-    }
-
-    public static void register(FieldMapperFactory factory) {
-        overriddenFactories.add(factory);
-    }
-
-    static List<FieldMapperFactory> getOverriddenFactories(){
-        return overriddenFactories;
     }
 
 }

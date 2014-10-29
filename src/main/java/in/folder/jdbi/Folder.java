@@ -1,8 +1,8 @@
 package in.folder.jdbi;
 
-import in.folder.jdbi.mapper.AnnotatedField1;
-import in.folder.jdbi.mapper.AnnotatedFieldFactory1;
-import in.folder.jdbi.mapper.AnnotatedFields1;
+import in.folder.jdbi.mapper.AnnotatedField;
+import in.folder.jdbi.mapper.AnnotatedFieldFactory;
+import in.folder.jdbi.mapper.AnnotatedFields;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
@@ -16,10 +16,10 @@ import static java.util.Objects.isNull;
 
 public class Folder<T> {
 
-    private Map<Class<?>, AnnotatedFields1> fieldsMap = new HashMap<>();
+    private Map<Class<?>, AnnotatedFields> fieldsMap = new HashMap<>();
 
     public void fold(List<T> accumulator, T currentObject) {
-        fieldsMap = AnnotatedFieldFactory1.get(currentObject.getClass());
+        fieldsMap = AnnotatedFieldFactory.get(currentObject.getClass());
         mergeCollection(accumulator, currentObject);
     }
 
@@ -27,9 +27,9 @@ public class Folder<T> {
         if(isNull(oldObject) || isNull(newObject))
             return;
 
-        AnnotatedFields1 annotatedFields = fieldsMap.get(oldObject.getClass());
+        AnnotatedFields annotatedFields = fieldsMap.get(oldObject.getClass());
 
-        for (AnnotatedField1 annotatedField : annotatedFields.values()) {
+        for (AnnotatedField annotatedField : annotatedFields.values()) {
             Object oldValue = get(annotatedField.getField(), oldObject);
             Object newValue = get(annotatedField.getField(), newObject);
             if(annotatedField.isOneToOne()) {
@@ -63,7 +63,7 @@ public class Folder<T> {
 
     private<M> M getAlreadyPresentValue(Collection<M> collection, M object) {
         HashMap<String, Object> filter = new HashMap<>();
-        for (AnnotatedField1 primaryKeyField : fieldsMap.get(object.getClass()).getPrimaryKeys()) {
+        for (AnnotatedField primaryKeyField : fieldsMap.get(object.getClass()).getPrimaryKeys()) {
             Field field = primaryKeyField.getField();
             filter.put(primaryKeyField.getName(), get(field, object));
         }

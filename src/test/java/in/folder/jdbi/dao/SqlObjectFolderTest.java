@@ -2,11 +2,14 @@ package in.folder.jdbi.dao;
 
 import in.folder.jdbi.DaoTest;
 import in.folder.jdbi.GenericFolder;
+import in.folder.jdbi.container.FoldingListContainerFactory;
 import in.folder.jdbi.mapper.BigDecimalMapperFactory;
+import in.folder.jdbi.mapper.CustomMapperFactory;
 import in.folder.jdbi.model.*;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.skife.jdbi.v2.DBI;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -137,7 +140,14 @@ public class SqlObjectFolderTest extends DaoTest {
         Movie jeans = Movie.builder().movieId(1).movieName("Jeans").ratings(BigDecimal.ONE).build();
         insert(jeans);
 
-        GenericFolder.register(new BigDecimalMapperFactory());
+
+        DBI dbi = getDbi();
+        CustomMapperFactory factory = new CustomMapperFactory();
+        factory.register(new BigDecimalMapperFactory());
+        dbi.registerMapper(factory);
+        dbi.registerContainerFactory(new FoldingListContainerFactory());
+        SqlObjectDao dao = dbi.open().attach(SqlObjectDao.class);
+
 
         Movie movie = dao.getMovie(1).getValues().get(0);
 

@@ -1,6 +1,6 @@
 package in.folder.jdbi.model;
 
-import in.folder.jdbi.mapper.CustomMapper1;
+import in.folder.jdbi.mapper.CustomMapper;
 import org.skife.jdbi.v2.StatementContext;
 import org.skife.jdbi.v2.tweak.ResultSetMapper;
 
@@ -9,10 +9,10 @@ import java.sql.SQLException;
 
 public class MovieMapper implements ResultSetMapper<Movie> {
 
-    private final CustomMapper1<Movie> mapper;
+    private final CustomMapper<Movie> mapper;
 
     public MovieMapper() {
-        this.mapper = new CustomMapper1<>(Movie.class);
+        this.mapper = new CustomMapper<>(Movie.class);
     }
 
     @Override

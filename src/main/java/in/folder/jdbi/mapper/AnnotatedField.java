@@ -7,14 +7,14 @@ import in.folder.jdbi.annotations.PrimaryKey;
 import java.lang.reflect.Field;
 import java.util.*;
 
-public class AnnotatedField1 {
+public class AnnotatedField {
     private Field field;
     private Class<?> annotationType;
     private Class<?> type;
     private String nameSpace;
 
 
-    public AnnotatedField1(Field field, Class<?> annotationType, Class<?> type) {
+    public AnnotatedField(Field field, Class<?> annotationType, Class<?> type) {
         this.field = field;
         this.annotationType = annotationType;
         this.type = type;

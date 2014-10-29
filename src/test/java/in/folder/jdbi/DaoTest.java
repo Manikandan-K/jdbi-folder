@@ -9,11 +9,14 @@ import org.skife.jdbi.v2.DBI;
 import org.skife.jdbi.v2.Handle;
 
 public class DaoTest {
-    protected static DBI dbi= new DBI("jdbc:postgresql://localhost:5432/jdbi","postgres","pass");
+    protected static DBI dbi= new DBI("jdbc:postgresql://localhost:5432/jdbi","postgres","pass");;
+
+    protected DBI getDbi() {
+        return new DBI("jdbc:postgresql://localhost:5432/jdbi","postgres","pass");
+    }
+
     static {
-        CustomMapperFactory factory = new CustomMapperFactory();
-        factory.register(new BigDecimalMapperFactory());
-        dbi.registerMapper(factory);
+        dbi.registerMapper(new CustomMapperFactory());
         dbi.registerContainerFactory(new FoldingListContainerFactory());
     }
     protected static Handle handle = dbi.open();

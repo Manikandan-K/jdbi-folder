@@ -3,7 +3,6 @@ package in.folder.jdbi.mapper;
 import in.folder.jdbi.annotations.ColumnName;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -33,7 +32,7 @@ public class CustomMapperTest {
     @Mock
     StatementContext ctx;
 
-    CustomMapper1<SampleBean> mapper = new CustomMapper1<>(SampleBean.class, new ArrayList<>());
+    CustomMapper<SampleBean> mapper = new CustomMapper<>(SampleBean.class, new ArrayList<>());
 
     @Test
     public void shouldSetValueOnPrivateField() throws Exception {
