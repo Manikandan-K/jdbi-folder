@@ -12,8 +12,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class CustomMapperFactory implements ResultSetMapperFactory {
 
     private List<Class<?>> excludedTypes = new ArrayList<>();
-    private static List<FieldMapperFactory> overriddenFactories = new ArrayList<>();
-    private static ConcurrentHashMap<String, CustomMapper> cache = new ConcurrentHashMap<>();
+    private List<FieldMapperFactory> overriddenFactories = new ArrayList<>();
+    private ConcurrentHashMap<String, CustomMapper> cache = new ConcurrentHashMap<>();
 
     public CustomMapperFactory() {
         excludedTypes.add(Boolean.class);
@@ -44,7 +44,7 @@ public class CustomMapperFactory implements ResultSetMapperFactory {
         return mapperFor(type, "");
     }
 
-    public static <M> CustomMapper<M> mapperFor(Class<M> type, String nameSpace) {
+    public <M> CustomMapper<M> mapperFor(Class<M> type, String nameSpace) {
         String key = type.toString() + nameSpace;
         if( cache.contains(key) ) {
             return cache.get(key);

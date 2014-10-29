@@ -1,5 +1,6 @@
 package in.folder.jdbi;
 
+import in.folder.jdbi.mapper.CustomMapper;
 import in.folder.jdbi.mapper.CustomMapperFactory;
 import in.folder.jdbi.mapper.FieldMapperFactory;
 import org.skife.jdbi.v2.Folder2;
@@ -16,10 +17,11 @@ public class GenericFolder<T> implements Folder2<List<T>> {
     private final ResultSetMapper<T> mapper;
     private final List<T> acc;
     private final Folder folder;
+    private static List<FieldMapperFactory> overriddenFactories  = new ArrayList<>();
 
     public GenericFolder(Class<T> type) {
         folder = new Folder();
-        mapper = CustomMapperFactory.mapperFor(type, "");
+        mapper = new CustomMapper<>(type, overriddenFactories);
         acc = new ArrayList<>();
     }
 
@@ -32,6 +34,10 @@ public class GenericFolder<T> implements Folder2<List<T>> {
         T object = mapper.map(rs.getRow(), rs, ctx);
         folder.fold(accumulator, object);
         return accumulator;
+    }
+
+    public static void register(FieldMapperFactory fieldMapperFactory) {
+        overriddenFactories.add(fieldMapperFactory);
     }
 
 }

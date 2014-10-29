@@ -157,13 +157,7 @@ public class MovieDaoTest extends DaoTest {
         Movie jeans = Movie.builder().movieId(1).movieName("Jeans").ratings(BigDecimal.ONE).build();
         insert(jeans);
 
-        DBI dbi = getDbi();
-
-        CustomMapperFactory factory = new CustomMapperFactory();
-        factory.register(new BigDecimalMapperFactory());
-        dbi.registerMapper(factory);
-        Dao dao = dbi.open().attach(Dao.class);
-
+        GenericFolder.register(new BigDecimalMapperFactory());
 
         Movie movie = dao.getMovie(1);
 

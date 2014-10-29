@@ -1,13 +1,16 @@
 package in.folder.jdbi.dao;
 
 import in.folder.jdbi.DaoTest;
+import in.folder.jdbi.mapper.BigDecimalMapperFactory;
 import in.folder.jdbi.mapper.CustomMapper;
+import in.folder.jdbi.mapper.CustomMapperFactory;
 import in.folder.jdbi.model.Movie;
 import in.folder.jdbi.model.Song;
 import in.folder.jdbi.model.Team;
 import in.folder.jdbi.model.primitiveBean;
 import org.junit.Before;
 import org.junit.Test;
+import org.skife.jdbi.v2.DBI;
 import org.skife.jdbi.v2.Query;
 
 import java.math.BigDecimal;
@@ -66,6 +69,13 @@ public class SqlObjectDaoTest extends DaoTest {
     public void shouldUseCustomMapperForFactoryForBigDecimal(){
         Team csk = new Team(1,"CSK",BigDecimal.ONE);
         insert(csk);
+
+        DBI dbi = getDbi();
+
+        CustomMapperFactory factory = new CustomMapperFactory();
+        factory.register(new BigDecimalMapperFactory());
+        dbi.registerMapper(factory);
+        SqlObjectDao dao = dbi.open().attach(SqlObjectDao.class);
 
         List<Team> teams = dao.getTeam();
 
