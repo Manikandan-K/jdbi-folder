@@ -1,8 +1,11 @@
-package in.folder.jdbi.helper;
+package in.folder.jdbi.mapper;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import static java.util.Objects.nonNull;
 
@@ -28,6 +31,17 @@ public class FieldHelper {
         }
     }
 
+    public static <T> T getInstance(Class<T> type) {
+        try {
+            return type.newInstance();
+        }
+        catch (Exception e) {
+            throw new IllegalArgumentException(String.format("A bean, %s, was mapped " +
+                    "which was not instantiable", type.getName()), e);
+        }
+
+    }
+
     public static Class<?> getParameterisedReturnType(Field field){
         Class<?> result = null ;
         Type genericFieldType = field.getGenericType();
@@ -42,4 +56,15 @@ public class FieldHelper {
         }
         throw new IllegalArgumentException(String.format("The field type %s is not inferrable",field.getName()));
     }
+
+    public static List<Field> getFields(Class<?> type) {
+        List<Field> result = new ArrayList<>();
+        Class<?> clazz = type;
+        while(clazz.getSuperclass() != null) {
+            result.addAll(Arrays.asList(clazz.getDeclaredFields()));
+            clazz = clazz.getSuperclass();
+        }
+        return result;
+    }
+
 }

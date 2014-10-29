@@ -13,14 +13,15 @@ import java.util.Arrays;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
-public class MovieDaoTest extends DaoTest {
-     private Dao dao;
+public class SqlObjectFolderTest extends DaoTest {
+    private SqlObjectDao dao;
 
     @Before
-    public void before() {
-        dao = handle.attach(Dao.class);
+    public void setUp() {
+        dao = handle.attach(SqlObjectDao.class);
     }
 
     @Test
@@ -34,8 +35,10 @@ public class MovieDaoTest extends DaoTest {
         insert(jeans);
         insert(song1, song2,song3, song4);
 
-        Movie movie = dao.getMovie(1);
+        List<Movie> movies = dao.getMovie(1).getValues();
 
+        assertEquals(1, movies.size());
+        Movie movie = movies.get(0);
         assertEquals(new Integer(1), movie.getMovieId());
         assertEquals("Jeans", movie.getMovieName());
         assertEquals(4, movie.getSongs().size());
@@ -45,19 +48,19 @@ public class MovieDaoTest extends DaoTest {
 
     @Test
     public void shouldReturnNullWhenNoRecordIsFound() throws Exception {
-        Movie movie = dao.getMovie(1);
+        List<Movie> movies = dao.getMovie(1).getValues();
 
-        assertNull(movie);
+        assertEquals(0, movies.size());
     }
 
 
     @Test
-    @Ignore
+    @Ignore("Empty list for left join")
     public void shouldGetMovieAloneIfThereIsNoSongs() throws Exception {
         Movie jeans = Movie.builder().movieId(1).movieName("Jeans").build();
         insert(jeans);
 
-        Movie movie = dao.getMovie(1);
+        Movie movie = dao.getMovie(1).getValues().get(0);
 
         assertEquals(new Integer(1), movie.getMovieId());
         assertEquals("Jeans", movie.getMovieName());
@@ -77,7 +80,7 @@ public class MovieDaoTest extends DaoTest {
         insert(jeans, bombay);
         insert(song1, song2, song3, song4, song5);
 
-        List<Movie> movies = dao.getAllMovies();
+        List<Movie> movies = dao.getAllMovies().getValues();
 
         assertEquals(2, movies.size());
         assertEquals("Jeans",movies.get(0).getMovieName());
@@ -104,7 +107,7 @@ public class MovieDaoTest extends DaoTest {
         insert(song1, song2);
         insert(prashanth, aishwarya);
 
-        Movie movie = dao.getMovie(1);
+        Movie movie = dao.getMovie(1).getValues().get(0);
 
         assertEquals(2, movie.getSongs().size());
         List<String> songNames = movie.getSongs().stream().map(Song::getSongName).collect(toList());
@@ -122,31 +125,11 @@ public class MovieDaoTest extends DaoTest {
         insert(jeans);
         insert(shankar);
 
-        Movie movie = dao.getMovie(1);
+        Movie movie = dao.getMovie(1).getValues().get(0);
 
         assertEquals("Jeans", movie.getMovieName());
         assertEquals(new Integer(1), movie.getDirector().getDirectorId());
         assertEquals("Shankar", movie.getDirector().getDirectorName());
-    }
-
-    @Test
-    public void shouldGetMovieAlongWithDirectorAndAssistantDirector() throws Exception {
-        Movie jeans = Movie.builder().movieId(1).movieName("Jeans").build();
-        Director shankar = Director.builder().directorId(1).directorName("Shankar").movieId(1).build();
-        AssistantDirector assistantDirector1 = AssistantDirector.builder().id(1).name("Name1").directorId(1).build();
-        AssistantDirector assistantDirector2 = AssistantDirector.builder().id(2).name("Name2").directorId(1).build();
-
-        insert(jeans);
-        insert(shankar);
-        insert(assistantDirector1, assistantDirector2);
-
-        List<Movie> movies = dao.getMovieDirector();
-
-        assertEquals(1, movies.size());
-        Director director = movies.get(0).getDirector();
-        assertEquals("Shankar", director.getDirectorName());
-        assertEquals(new Integer(1), director.getDirectorId());
-        assertEquals(2, director.getAssistantDirectors().size());
     }
 
     @Test
@@ -156,8 +139,81 @@ public class MovieDaoTest extends DaoTest {
 
         GenericFolder.register(new BigDecimalMapperFactory());
 
-        Movie movie = dao.getMovie(1);
+        Movie movie = dao.getMovie(1).getValues().get(0);
 
         assertEquals(BigDecimal.TEN, movie.getRatings());
     }
+
+    @Test
+    public void shouldGetMusicianAlongWithAlbumAndSongs() throws Exception {
+        dataSetupForRahman();
+
+        List<Musician> musicians = dao.getMusician().getValues();
+
+        assertEquals(1, musicians.size());
+        Musician musician = musicians.get(0);
+        List<Album> albums = musician.getAlbums();
+        assertEquals(2, albums.size());
+        assertEquals("Roja", albums.get(0).getName());
+        List<Song> songs1 = albums.get(0).getSongs();
+        assertEquals(2, songs1.size());
+        assertEquals("Kadhal Rojave", songs1.get(0).getSongName());
+        assertEquals("Pudhu Vellai", songs1.get(1).getSongName());
+        List<Song> songs2 = albums.get(1).getSongs();
+        assertEquals(2, songs2.size());
+        assertEquals("Kannalane", songs2.get(0).getSongName());
+        assertEquals("Uyire", songs2.get(1).getSongName());
+    }
+
+    @Test
+    public void shouldGetMultipleMusicians() throws Exception {
+        dataSetupForRahman();
+        dataSetupForIlayaraja();
+
+        List<Musician> musicians = dao.getMusician().getValues();
+
+        assertEquals(2, musicians.size());
+        Musician rahman = musicians.get(0);
+        assertEquals(2, rahman.getAlbums().size());
+        assertEquals(2, rahman.getAlbums().get(0).getSongs().size());
+        assertEquals(2, rahman.getAlbums().get(1).getSongs().size());
+        Musician ilayaRaja = musicians.get(1);
+        assertEquals(2, ilayaRaja.getAlbums().size());
+        assertEquals(1, ilayaRaja.getAlbums().get(0).getSongs().size());
+        assertEquals(2, ilayaRaja.getAlbums().get(1).getSongs().size());
+
+    }
+
+    private void dataSetupForRahman() {
+        Musician rahman = Musician.builder().id(1).name("Rahman").build();
+
+        Album roja = Album.builder().id(1).name("Roja").musicianId(1).build();
+        Song song1 = Song.builder().songId(1).songName("Kadhal Rojave").albumId(1).build();
+        Song song2 = Song.builder().songId(2).songName("Pudhu Vellai").albumId(1).build();
+
+        Album bombay = Album.builder().id(2).name("Bombay").musicianId(1).build();
+        Song song3 = Song.builder().songId(3).songName("Kannalane").albumId(2).build();
+        Song song4 = Song.builder().songId(4).songName("Uyire").albumId(2).build();
+
+        insert(rahman);
+        insert(roja, bombay);
+        insert(song1, song2, song3, song4);
+    }
+
+    private void dataSetupForIlayaraja() {
+        Musician ilayaraja = Musician.builder().id(2).name("Ilayaraja").build();
+
+        Album roja = Album.builder().id(3).name("16 vayathinile").musicianId(2).build();
+        Song song1 = Song.builder().songId(5).songName("Senthoora poove").albumId(3).build();
+
+        Album bombay = Album.builder().id(4).name("Mullum Malarum").musicianId(2).build();
+        Song song2 = Song.builder().songId(6).songName("Senthalam poovil").albumId(4).build();
+        Song song3 = Song.builder().songId(7).songName("Nitham nitham").albumId(4).build();
+
+        insert(ilayaraja);
+        insert(roja, bombay);
+        insert(song1, song2, song3);
+    }
+
+
 }

@@ -4,10 +4,13 @@ import in.folder.jdbi.annotations.ColumnName;
 import in.folder.jdbi.annotations.OneToMany;
 import in.folder.jdbi.annotations.OneToOne;
 import in.folder.jdbi.annotations.PrimaryKey;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @NoArgsConstructor
@@ -21,7 +24,7 @@ public class Movie {
     private String movieName;
 
     @OneToMany(name = "song")
-    private List<Song> songs;
+    private ArrayList<Song> songs;
 
     @OneToMany(name = "actor")
     private List<Actor> actors;
