@@ -3,7 +3,6 @@ package in.folder.jdbi.mapper;
 import in.folder.jdbi.DaoTest;
 import in.folder.jdbi.annotations.OneToMany;
 import in.folder.jdbi.annotations.OneToOne;
-import in.folder.jdbi.annotations.PrimaryKey;
 import lombok.Getter;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -99,7 +98,6 @@ interface MapperDao {
 
 @Getter
 class Level1 {
-    @PrimaryKey
     private Integer id;
     private String stringCol;
     private BigDecimal numericCol;
@@ -114,7 +112,6 @@ class Level1 {
 
 @Getter
 class Level2_1to1 {
-    @PrimaryKey
     private Integer id;
     private String stringCol;
     private Integer level1Id;
@@ -125,7 +122,6 @@ class Level2_1to1 {
 
 @Getter
 class Level2_1toMany {
-    @PrimaryKey
     private Integer id;
     private String stringCol;
     private Integer level1Id;
@@ -133,7 +129,6 @@ class Level2_1toMany {
 
 @Getter
 class Level3_1toMany {
-    @PrimaryKey
     private Integer id;
     private String stringCol;
     private Integer level2Id;

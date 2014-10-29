@@ -8,6 +8,7 @@ import in.folder.jdbi.model.Director;
 import in.folder.jdbi.model.Movie;
 import in.folder.jdbi.model.Song;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -54,6 +55,7 @@ public class MovieDaoTest extends DaoTest {
 
 
     @Test
+    @Ignore
     public void shouldGetMovieAloneIfThereIsNoSongs() throws Exception {
         Movie jeans = Movie.builder().movieId(1).movieName("Jeans").build();
         insert(jeans);
