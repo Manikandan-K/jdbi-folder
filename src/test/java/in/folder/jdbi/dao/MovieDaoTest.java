@@ -53,20 +53,6 @@ public class MovieDaoTest extends DaoTest {
         assertNull(movie);
     }
 
-
-    @Test
-    @Ignore
-    public void shouldGetMovieAloneIfThereIsNoSongs() throws Exception {
-        Movie jeans = Movie.builder().movieId(1).movieName("Jeans").build();
-        insert(jeans);
-
-        Movie movie = dao.getMovie(1);
-
-        assertEquals(new Integer(1), movie.getMovieId());
-        assertEquals("Jeans", movie.getMovieName());
-        assertEquals(0, movie.getSongs().size());
-    }
-
     @Test
     public void shouldGetMultipleMovies() throws Exception {
         Movie jeans = Movie.builder().movieId(1).movieName("Jeans").build();

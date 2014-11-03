@@ -22,16 +22,8 @@ public class MapperTest extends DaoTest {
 
     private MapperDao dao;
 
-    @BeforeClass
-    public static void createTables() {
-        handle.execute("create table level1 (id numeric not null, string_col varchar , numeric_col numeric );");
-        handle.execute("create table level2_1to1 (id numeric not null, string_col varchar , level1_id numeric );");
-        handle.execute("create table level2_1to_many (id numeric not null, string_col varchar , level1_id numeric );");
-        handle.execute("create table level3_1to_many (id numeric not null, string_col varchar , level2_id numeric );");
-    }
-
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         dao = handle.attach(MapperDao.class);
     }
 
@@ -65,14 +57,6 @@ public class MapperTest extends DaoTest {
         assertThat(level3_1toMany.getLevel2Id(), is(21));
     }
 
-    @AfterClass
-    public static void tearDown() throws Exception {
-        handle.execute("drop table level1;");
-        handle.execute("drop table level2_1to1;");
-        handle.execute("drop table level2_1to_many;");
-        handle.execute("drop table level3_1to_many;");
-
-    }
 }
 
 interface MapperDao {
