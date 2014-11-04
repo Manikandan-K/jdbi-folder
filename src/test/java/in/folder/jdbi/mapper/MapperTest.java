@@ -22,13 +22,33 @@ public class MapperTest extends DaoTest {
 
     private MapperDao dao;
 
+    @BeforeClass
+    public static void createTables() {
+        handle.execute("create table level1 (id numeric not null, string_col varchar , numeric_col numeric );");
+        handle.execute("create table level2_1to1 (id numeric not null, string_col varchar , level1_id numeric );");
+        handle.execute("create table level2_1to_many (id numeric not null, string_col varchar , level1_id numeric );");
+        handle.execute("create table level3_1to_many (id numeric not null, string_col varchar , level2_id numeric );");
+    }
+
     @Before
     public void setUp() {
         dao = handle.attach(MapperDao.class);
+        handle.execute("delete from level1;");
+        handle.execute("delete from level2_1to1;");
+        handle.execute("delete from level2_1to_many;");
+        handle.execute("delete from level3_1to_many;");
+
     }
 
+    @AfterClass
+    public static void dropTables() throws Exception {
+        handle.execute("drop table level1;");
+        handle.execute("drop table level2_1to1;");
+        handle.execute("drop table level2_1to_many;");
+        handle.execute("drop table level3_1to_many;");
+    }
 
-    @Test
+        @Test
     public void shouldMapLevel1DetailsAlongWithNestedObjects() {
         handle.execute("insert into level1 values(?,?,?)", 8, "Hi", 10);
         handle.execute("insert into level2_1to1 values(?,?,?)", 21, "Level2 OneToOne", 8);

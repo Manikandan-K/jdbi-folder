@@ -18,10 +18,27 @@ public class MultipleLevelObjectTest extends DaoTest {
 
     private MultipleLevelObjectDao dao;
 
+    @BeforeClass
+    public static void createTables() {
+        handle.execute("create table level1 (id numeric not null, string_col varchar , numeric_col numeric );");
+        handle.execute("create table level2 (id numeric not null, string_col varchar , level1_id numeric );");
+    }
+
+
     @Before
     public void setUp() throws Exception {
         dao = handle.attach(MultipleLevelObjectDao.class);
+        handle.execute("delete from level1");
+        handle.execute("delete from level2");
+
     }
+
+    @AfterClass
+    public static void dropTables() throws Exception {
+        handle.execute("drop table level1");
+        handle.execute("drop table level2");
+    }
+
 
     @Test
     public void shouldGetLevelEntriesWithLevel2Entries() throws Exception {

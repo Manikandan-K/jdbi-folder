@@ -1,7 +1,6 @@
 package in.folder.jdbi.dao;
 
 import in.folder.jdbi.DaoTest;
-import in.folder.jdbi.GenericFolder;
 import in.folder.jdbi.container.FoldingListContainerFactory;
 import in.folder.jdbi.mapper.BigDecimalMapperFactory;
 import in.folder.jdbi.mapper.CustomMapperFactory;

@@ -23,9 +23,7 @@ public class DaoTest {
     protected static Handle handle = dbi.open();
 
     @BeforeClass
-    public static void createTables() {
-        handle.execute("create table level1 (id numeric not null, string_col varchar , numeric_col numeric );");
-        handle.execute("create table level2 (id numeric not null, string_col varchar , level1_id numeric );");
+    public static void createDefaultTables() {
         handle.execute("create table movie (movie_id numeric not null, movie_name varchar not null, ratings numeric);");
         handle.execute("create table song ( movie_id numeric, song_id numeric not null, song_name varchar not null, album_id numeric);");
         handle.execute("create table actor( movie_id numeric, actor_id numeric not null, actor_name varchar not null);");
@@ -35,9 +33,6 @@ public class DaoTest {
         handle.execute("create table team (id numeric not null, name varchar not null, average numeric);");
         handle.execute("create table primitive(intField integer, floatField numeric, doubleField numeric, booleanField boolean, longField numeric,intObjectField integer, floatObjectField numeric, doubleObjectField numeric, booleanObjectField boolean, longObjectField numeric );");
         handle.execute("create table assistant_director (id numeric not null, name varchar not null, director_id numeric);");
-        handle.execute("create table level2_1to1 (id numeric not null, string_col varchar , level1_id numeric );");
-        handle.execute("create table level2_1to_many (id numeric not null, string_col varchar , level1_id numeric );");
-        handle.execute("create table level3_1to_many (id numeric not null, string_col varchar , level2_id numeric );");
     }
 
 
@@ -52,10 +47,6 @@ public class DaoTest {
         handle.execute("delete from team");
         handle.execute("delete from primitive");
         handle.execute("delete from assistant_director");
-        handle.execute("delete from level1;");
-        handle.execute("delete from level2_1to1;");
-        handle.execute("delete from level2_1to_many;");
-        handle.execute("delete from level3_1to_many;");
     }
 
     protected void insert(Movie... movies) {
@@ -109,8 +100,6 @@ public class DaoTest {
 
     @AfterClass
     public static void tearDown() throws Exception {
-        handle.execute("drop table level1");
-        handle.execute("drop table level2");
         handle.execute("drop table movie");
         handle.execute("drop table song");
         handle.execute("drop table actor");
@@ -120,9 +109,6 @@ public class DaoTest {
         handle.execute("drop table team");
         handle.execute("drop table primitive");
         handle.execute("drop table assistant_director");
-        handle.execute("drop table level2_1to1;");
-        handle.execute("drop table level2_1to_many;");
-        handle.execute("drop table level3_1to_many;");
     }
 
 }
