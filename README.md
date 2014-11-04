@@ -18,10 +18,10 @@ Example:
         private Integer id;
         private String name;
     
-        @OneToMany(name = "song", type = Song.class)
+        @OneToMany("song")
         private List<Song> songs;
     
-        @OneToOne(name = "director")
+        @OneToOne("director")
         private Director director;
       }
 
@@ -42,6 +42,9 @@ Example:
 
 We need to say which fields are primary keys by the annotation @PrimaryKey. This will be used for folding the objects.  If you see annotation we have specified value for "name". It's used to identify fields from the result set. We can use single query to fetch all these information. Just instantiate default folder.
 
+Fluent Queries:
+--------------------------
+
     GenericFolder folder = new GenericFolder(Movie.class);
 
     handle
@@ -56,9 +59,38 @@ We need to say which fields are primary keys by the annotation @PrimaryKey. This
       left join director d  using (movie_id)
     ")
     .fold(folder.getAccumulator(), folder).
+    
 
-That's all. We can use this GenericFolder for any class. One catch is, we need to specify "name" in the query. ie, We have specified "song" as name in the oneToMany annotion. We need to use the same name "song" in the result field name followed by $.
+That's all. We can use this GenericFolder for any class. One catch is, we need to specify "namespace" in the query. ie, We have specified "song" as name in the oneToMany annotion. We need to use the same namespace "song" in the result field name followed by $.
 For example to accesss the id of the song, We need to say song$id. We can use this folder for any level of relationship.
+
+Sql Object:
+--------------------------
+
+    interface Dao {
+        @SqlQuery("select
+                m.*,
+                s.id AS song$id,
+                s.name AS song$name,
+                d.id  AS director$id,
+                d.name AS director$name
+              from movie m
+              join song s      using (movie_id)
+              join director d  using (movie_id)
+            ")
+        private FoldingList<Movie> getMovies();    
+    }
+    
+    FoldingList<Movie> foldedResult = dao.getMovies();
+    List<Movie> movies =  foldedResult.getValues();
+    
+Whenever we need results to be folded, we need to use FoldingList<?> instead of List<?>. Result will be folded. Just call getValues on FoldingList will give List<?> values.
+And register CustomMapperFactory & FoldingListContainerFactory to dbi.
+
+       dbi.registerMapper(new CustomMapperFactory());
+       dbi.registerContainerFactory(new FoldingListContainerFactory());
+
+    
 
 Mapper:
 ------------------------
@@ -72,11 +104,8 @@ Mapper:
     
     dbi.registerMapper(new CustomMapperFactory());
     
-  Thats all. We can forget about the mappers. If we have very specific case for mapping any class, we can exclude that class and have custom mapper for that class alone. Lets say we want to use this mapper for all the classes except Product class.    
-  
-    dbi.registerMapper(new CustomMapperFactory(Product.class));
-    
-  By default, this mapper will be used for all the classes unless we specify some classes in the excluded list like we did above. And also if we want have any special case while mapping fields, we can do that also. We need to implement FieldMapperFactory<T>. Lets say we have wrapper object called Money which has currency value.
+  Thats all. We can forget about the mappers. If we have very specific case for mapping any class, we can use @Mapper to override the default mapper.     
+  By default, this mapper will be used for all the classes  And also if we want have any special case while mapping fields, we can do that also. We need to implement FieldMapperFactory<T>. Lets say we have wrapper object called Money which has currency value.
   
     public class MoneyMapperFactory implements FieldMapperFactory<Money>{
   
@@ -98,7 +127,30 @@ We just need to register this class to CustomMapperFactory. It will take care of
     dbi.registerMapper(customMapperFactory);
 
 We can extend this to handle JSON objects and other complex types.
+Another use case would be having OneToOne relation inside another class. DefaultMapper will take care of mapping these objects.
 
+    class Movie {
+        private Integer id;
+        private String name;
+        
+        @OneToOne("director")
+        Director director;
+    }
+
+    interface Dao {
+        @SqlQuery("select
+                m.*,
+                d.id  AS director$id,
+                d.name AS director$name
+              from movie m
+              join director d  using (movie_id)
+            ")
+        private Movie getMovie();    
+    }
+    
+    Movie movie = dao.getMovie();
+
+Automatically Director object will be created inside Movie object using this result set.   
 
 Version:
 --------------------------------
