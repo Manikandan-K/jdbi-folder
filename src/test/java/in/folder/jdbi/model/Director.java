@@ -19,6 +19,6 @@ public class Director {
     private String directorName;
     private Integer movieId;
 
-    @OneToMany(name = "assistant")
+    @OneToMany("assistant")
     private List<AssistantDirector> assistantDirectors;
 }

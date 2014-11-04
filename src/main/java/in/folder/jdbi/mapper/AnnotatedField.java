@@ -57,9 +57,9 @@ public class AnnotatedField {
     private String nameSpace() {
         String nameSpace = null ;
         if(isOneToMany()) {
-            nameSpace =  field.getAnnotation(OneToMany.class).name().toLowerCase();
+            nameSpace =  field.getAnnotation(OneToMany.class).value().toLowerCase();
         }else if(isOneToOne()) {
-            nameSpace = field.getAnnotation(OneToOne.class).name().toLowerCase();
+            nameSpace = field.getAnnotation(OneToOne.class).value().toLowerCase();
         }
         return nameSpace ;
     }

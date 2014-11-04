@@ -201,10 +201,10 @@ class Level1 {
     private Integer id;
     private String stringCol;
 
-    @OneToOne(name = "level1OneToOne")
+    @OneToOne("level1OneToOne")
     private Level2_1to1 level2_1to1;
 
-    @OneToMany(name = "level1OneToMany")
+    @OneToMany("level1OneToMany")
     private List<Level2_1toMany> level2_1toManyList;
 
 }
@@ -218,7 +218,7 @@ class Level2_1to1 {
     private Integer id;
     private String stringCol;
 
-    @OneToMany(name="level_three")
+    @OneToMany("level_three")
     private List<Level3_1toMany> level3_1toManyList;
 }
 
@@ -230,7 +230,7 @@ class Level2_1toMany {
     @PrimaryKey
     private Integer id;
     private String stringCol;
-    @OneToMany(name="level_three")
+    @OneToMany("level_three")
     private List<Level3_1toMany> level3_1toManyList;
 
 }

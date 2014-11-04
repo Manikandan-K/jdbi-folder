@@ -86,10 +86,10 @@ class Level1 {
     private String stringCol;
     private BigDecimal numericCol;
 
-    @OneToOne(name = "level1OneToOne")
+    @OneToOne("level1OneToOne")
     private Level2_1to1 level2_1to1;
 
-    @OneToMany(name = "level1OneToMany")
+    @OneToMany("level1OneToMany")
     private HashSet<Level2_1toMany> level2_1toManySet;
 
 }
@@ -100,7 +100,7 @@ class Level2_1to1 {
     private String stringCol;
     private Integer level1Id;
 
-    @OneToMany(name="level_three")
+    @OneToMany("level_three")
     private List<Level3_1toMany> level3_1toManyList;
 }
 

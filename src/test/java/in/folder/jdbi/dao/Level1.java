@@ -21,7 +21,7 @@ public class Level1 {
     @ColumnName("numeric_col")
     private Double numericCol;
 
-    @OneToMany(name = "levelTwo")
+    @OneToMany("levelTwo")
     private List<Level2> level2List;
 
 }

@@ -23,13 +23,13 @@ public class Movie {
     @ColumnName("name")
     private String movieName;
 
-    @OneToMany(name = "song")
+    @OneToMany("song")
     private ArrayList<Song> songs;
 
-    @OneToMany(name = "actor")
+    @OneToMany("actor")
     private List<Actor> actors;
 
-    @OneToOne(name = "director")
+    @OneToOne("director")
     private Director director;
 
     private BigDecimal ratings;
