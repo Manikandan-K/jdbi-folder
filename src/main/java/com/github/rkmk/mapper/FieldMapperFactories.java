@@ -2,10 +2,10 @@ package com.github.rkmk.mapper;
 
 import java.math.BigDecimal;
 import java.sql.*;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.Date;
-import java.util.List;
 
+import static java.util.Arrays.asList;
 import static java.util.Objects.nonNull;
 
 public class FieldMapperFactories {
@@ -35,6 +35,8 @@ public class FieldMapperFactories {
         factories.add(new DateMapperFactory());
         factories.add(new StringMapperFactory());
         factories.add(new StringArrayMapperFactory());
+        factories.add(new ListMapperFactory());
+        factories.add(new SetMapperFactory());
         factories.add(new EnumMapperFactory());
         factories.add(new ObjectMapperFactory());
     }
@@ -353,6 +355,43 @@ public class FieldMapperFactories {
         @Override
         public Boolean accepts(Class<?> type) {
             return true;
+        }
+    }
+
+    public static class ListMapperFactory implements FieldMapperFactory<List> {
+
+        @Override
+        public List getValue(ResultSet rs, int index, Class<?> type) throws SQLException {
+            Array sqlArray = rs.getArray(index);
+            return (sqlArray == null) ? new ArrayList<>() : new ArrayList<>(asList((Object[]) sqlArray.getArray()));
+        }
+
+        @Override
+        public Boolean accepts(Class<?> type) {
+            return type.isAssignableFrom(List.class);
+        }
+    }
+
+    public static class SetMapperFactory implements FieldMapperFactory<Set> {
+
+        @Override
+        public Set getValue(ResultSet rs, int index, Class<?> type) throws SQLException {
+            Set<Object> result = new HashSet<>();
+            Array sqlArray = rs.getArray(index);
+            if(sqlArray == null) {
+                return new HashSet<>();
+            }
+
+            Object[] array = (Object[]) sqlArray.getArray();
+            for(Object element : array) {
+                result.add(element);
+            }
+            return result;
+        }
+
+        @Override
+        public Boolean accepts(Class<?> type) {
+            return type.isAssignableFrom(Set.class);
         }
     }
 
