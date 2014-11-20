@@ -1,6 +1,17 @@
 JDBI Folders and Mappers:
 ----------------------------------------
 
+Usage
+----------------------------------------
+ Include this library in dependency list
+ 
+       <dependency>
+            <groupId>com.github.rkmk</groupId>
+            <artifactId>jdbi-folder</artifactId>
+            <version>1.0</version>
+        </dependency>
+
+
 Folder:
 ----------------------
 
@@ -156,9 +167,6 @@ Version:
 --------------------------------
 1.0
 
-Installation:
---------------------------------
-will be available in maven central soon.
 
 
   
