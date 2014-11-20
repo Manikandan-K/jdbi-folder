@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.hyphen.Hyphen.where;
+import static com.github.rkmk.Hyphen.where;
 import static com.github.rkmk.mapper.FieldHelper.get;
 import static java.util.Objects.isNull;
 
