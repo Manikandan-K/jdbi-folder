@@ -20,8 +20,8 @@ public class MultipleLevelObjectTest extends DaoTest {
 
     @BeforeClass
     public static void createTables() {
-        handle.execute("create table level1 (id numeric not null, string_col varchar , numeric_col numeric );");
-        handle.execute("create table level2 (id numeric not null, string_col varchar , level1_id numeric );");
+        handle.execute("create table level1 (id numeric not null, string_col varchar(100) , numeric_col float );");
+        handle.execute("create table level2 (id numeric not null, string_col varchar(100) , level1_id numeric );");
     }
 
 
@@ -42,7 +42,7 @@ public class MultipleLevelObjectTest extends DaoTest {
 
     @Test
     public void shouldGetLevelEntriesWithLevel2Entries() throws Exception {
-        Level1 l11 = Level1.builder().id(1).stringCol("Hi").numericCol(1.2d).build();
+        Level1 l11 = Level1.builder().id(1).stringCol("Hi").numericCol(1.2).build();
         Level1 l12 = Level1.builder().id(2).stringCol("Hello").numericCol(7.2d).build();
         Level2 l21 = Level2.builder().id(101).stringCol("Hi One").level1Id(1).build();
         Level2 l22 = Level2.builder().id(102).stringCol("Hi Two").level1Id(1).build();

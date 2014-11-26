@@ -10,10 +10,14 @@ import org.skife.jdbi.v2.DBI;
 import org.skife.jdbi.v2.Handle;
 
 public class DaoTest {
-    protected static DBI dbi= new DBI("jdbc:postgresql://localhost:5432/jdbi","postgres","pass");;
+    protected static DBI dbi= getDBI();
 
     protected DBI getDbi() {
-        return new DBI("jdbc:postgresql://localhost:5432/jdbi","postgres","pass");
+        return getDBI();
+    }
+
+    private static DBI getDBI() {
+        return System.getProperty("db").equals("postgres") ? new DBI("jdbc:postgresql://localhost:5432/jdbi", "postgres", "") : new DBI("jdbc:mysql://localhost/jdbi", "root", "");
     }
 
     static {
@@ -24,15 +28,15 @@ public class DaoTest {
 
     @BeforeClass
     public static void createDefaultTables() {
-        handle.execute("create table movie (movie_id numeric not null, movie_name varchar not null, ratings numeric);");
-        handle.execute("create table song ( movie_id numeric, song_id numeric not null, song_name varchar not null, album_id numeric);");
-        handle.execute("create table actor( movie_id numeric, actor_id numeric not null, actor_name varchar not null);");
-        handle.execute("create table director( movie_id numeric not null, director_id numeric not null, director_name varchar not null);");
-        handle.execute("create table musician (id numeric not null, name varchar not null);");
-        handle.execute("create table album (id numeric not null, name varchar not null, musician_id numeric);");
-        handle.execute("create table team (id numeric not null, name varchar not null, average numeric);");
+        handle.execute("create table movie (movie_id numeric not null, movie_name varchar(100) not null, ratings numeric);");
+        handle.execute("create table song ( movie_id numeric, song_id numeric not null, song_name varchar(100) not null, album_id numeric);");
+        handle.execute("create table actor( movie_id numeric, actor_id numeric not null, actor_name varchar(100) not null);");
+        handle.execute("create table director( movie_id numeric not null, director_id numeric not null, director_name varchar(100) not null);");
+        handle.execute("create table musician (id numeric not null, name varchar(100) not null);");
+        handle.execute("create table album (id numeric not null, name varchar(100) not null, musician_id numeric);");
+        handle.execute("create table team (id numeric not null, name varchar(100) not null, average numeric);");
         handle.execute("create table primitive(intField integer, floatField numeric, doubleField numeric, booleanField boolean, longField numeric,intObjectField integer, floatObjectField numeric, doubleObjectField numeric, booleanObjectField boolean, longObjectField numeric );");
-        handle.execute("create table assistant_director (id numeric not null, name varchar not null, director_id numeric);");
+        handle.execute("create table assistant_director (id numeric not null, name varchar(100) not null, director_id numeric);");
     }
 
 

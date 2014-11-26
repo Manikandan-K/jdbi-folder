@@ -24,10 +24,10 @@ public class MapperTest extends DaoTest {
 
     @BeforeClass
     public static void createTables() {
-        handle.execute("create table level1 (id numeric not null, string_col varchar , numeric_col numeric );");
-        handle.execute("create table level2_1to1 (id numeric not null, string_col varchar , level1_id numeric );");
-        handle.execute("create table level2_1to_many (id numeric not null, string_col varchar , level1_id numeric );");
-        handle.execute("create table level3_1to_many (id numeric not null, string_col varchar , level2_id numeric );");
+        handle.execute("create table level1 (id numeric not null, string_col varchar(100) , numeric_col numeric );");
+        handle.execute("create table level2_1to1 (id numeric not null, string_col varchar(100) , level1_id numeric );");
+        handle.execute("create table level2_1to_many (id numeric not null, string_col varchar(100) , level1_id numeric );");
+        handle.execute("create table level3_1to_many (id numeric not null, string_col varchar(100) , level2_id numeric );");
     }
 
     @Before

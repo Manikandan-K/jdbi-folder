@@ -1,8 +1,16 @@
 language: java
 jdk:
   - oraclejdk8
-services: postgresql
+services:
+  - postgresql
+  - mysql
+env:
+  - DB=mysql
+  - DB=postgres
 addons:
   postgresql: "9.3"
 before_script:
+  - psql -c 'drop database if exists jdbi;' -U postgres
   - psql -c 'create database jdbi;' -U postgres
+  - mysql -e 'create database if not exists jdbi;'
+script: mvn clean test -Ddb=$DB
