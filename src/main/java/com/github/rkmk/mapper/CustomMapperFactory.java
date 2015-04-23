@@ -41,17 +41,19 @@ public class CustomMapperFactory implements ResultSetMapperFactory {
 
     @Override
     public ResultSetMapper mapperFor(Class type, StatementContext ctx) {
-        return mapperFor(type, "");
+        return type.isEnum() ? getEnumMapper(type) :  mapperFor(type, "");
     }
 
     public <M> CustomMapper<M> mapperFor(Class<M> type, String nameSpace) {
         String key = type.toString() + nameSpace;
-        if( cache.contains(key) ) {
-            return cache.get(key);
+        if(!cache.containsKey(key)) {
+            cache.put(key, new CustomMapper<>(type, overriddenFactories));
         }
-        CustomMapper<M> mapper = new CustomMapper<>(type, overriddenFactories);
-        cache.put(key, mapper);
-        return mapper;
+        return cache.get(key);
+    }
+
+    public EnumMapper getEnumMapper(Class<? extends Enum> type) {
+        return new EnumMapper(type);
     }
 
     public void register(FieldMapperFactory factory) {
