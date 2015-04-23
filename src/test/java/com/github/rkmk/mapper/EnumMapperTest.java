@@ -19,7 +19,7 @@ public class EnumMapperTest extends DaoTest {
 
     @BeforeClass
     public static void createTables() {
-        handle.execute("create table enum_table (id numeric, level  varchar );");
+        handle.execute("create table enum_table (id numeric, level  varchar(10) );");
     }
 
     @Before
