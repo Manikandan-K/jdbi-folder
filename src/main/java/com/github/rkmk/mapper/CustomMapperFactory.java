@@ -17,12 +17,19 @@ public class CustomMapperFactory implements ResultSetMapperFactory {
 
     public CustomMapperFactory() {
         excludedTypes.add(Boolean.class);
+        excludedTypes.add(boolean.class);
         excludedTypes.add(Byte.class);
+        excludedTypes.add(byte.class);
         excludedTypes.add(Short.class);
+        excludedTypes.add(short.class);
         excludedTypes.add(Integer.class);
+        excludedTypes.add(int.class);
         excludedTypes.add(Long.class);
+        excludedTypes.add(long.class);
         excludedTypes.add(Float.class);
+        excludedTypes.add(float.class);
         excludedTypes.add(Double.class);
+        excludedTypes.add(double.class);
         excludedTypes.add(BigDecimal.class);
         excludedTypes.add(String.class);
     }
