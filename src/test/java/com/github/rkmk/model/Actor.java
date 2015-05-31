@@ -8,6 +8,7 @@ import lombok.experimental.Builder;
 @AllArgsConstructor
 @Builder
 @Getter
+@EqualsAndHashCode
 public class Actor {
     @PrimaryKey
     private Integer actorId;

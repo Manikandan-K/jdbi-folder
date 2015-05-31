@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static com.github.rkmk.helper.FieldWrapper.rootClassNameSpace;
 import static com.github.rkmk.mapper.FieldHelper.getParameterisedReturnType;
 import static java.util.Objects.nonNull;
 
@@ -36,7 +37,7 @@ public class AnnotatedFieldFactory {
 
     public static void processFields(Class<?> type) {
         Map<String, FieldWrapper> fields = new HashMap<>();
-        processFields(type, "", fields);
+        processFields(type, rootClassNameSpace, fields);
         fieldsMap.put(type, fields);
     }
 
@@ -71,7 +72,7 @@ public class AnnotatedFieldFactory {
     private static void processField(Map<String, FieldWrapper> fields, String nameSpace, Field field, Class<?> type) {
         ColumnName annotation = field.getAnnotation(ColumnName.class);
         String name = nonNull(annotation) ? annotation.value() : field.getName();
-        fields.put(getResultSetFieldName(nameSpace, name), new FieldWrapper(type, field));
+        fields.put(getResultSetFieldName(nameSpace, name), new FieldWrapper(type, field, nameSpace));
     }
 
     private static String getResultSetFieldName(String nameSpace, String name) {

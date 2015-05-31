@@ -10,6 +10,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.*;
 
+import static com.github.rkmk.helper.FieldWrapper.rootClassNameSpace;
 import static com.github.rkmk.mapper.FieldHelper.getInstance;
 import static java.util.Objects.nonNull;
 
@@ -29,7 +30,7 @@ public class CustomMapper<T> implements ResultSetMapper<T>
         this.factories.addAll(overriddenFactories);
         this.factories.addAll(new FieldMapperFactories().getValues());
         this.fields = AnnotatedFieldFactory.getFields(type);
-        annotatedFieldsMap = AnnotatedFieldFactory.get(type);
+        this.annotatedFieldsMap = AnnotatedFieldFactory.get(type);
 
     }
 
@@ -47,9 +48,9 @@ public class CustomMapper<T> implements ResultSetMapper<T>
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public T map(int row, ResultSet rs, StatementContext ctx) throws SQLException {
-        HashMap<Class<?>, Object> instanceMap = new HashMap<>();
+        HashMap<String, Object> instanceMap = new HashMap<>();
         T object = getInstance(type);
-        instanceMap.put(type, object);
+        instanceMap.put(rootClassNameSpace, object);
 
         Set<String> nestedClassNames = getNestedClassNames(rs);
 
@@ -71,15 +72,16 @@ public class CustomMapper<T> implements ResultSetMapper<T>
                 }
             }
         }
-        setNestedObjects(type, nestedClassNames, instanceMap);
+        setNestedObjects(type, nestedClassNames, instanceMap, object);
         return object;
     }
 
-    private void setNestedObjects(Class<?> type, Set<String> nestedClassNames, Map<Class<?>, Object> instanceMap) {
+    private void setNestedObjects(Class<?> type, Set<String> nestedClassNames, Map<String, Object> instanceMap, Object parentObject) {
         for (AnnotatedField field : annotatedFieldsMap.get(type).values()) {
-            if(nestedClassNames.contains(field.getNameSpace()) && instanceMap.containsKey(field.getType()) ) {
-                field.set(instanceMap.get(field.getDeclaringClass()), instanceMap.get(field.getType()));
-                setNestedObjects(field.getType(), nestedClassNames, instanceMap);
+            if(nestedClassNames.contains(field.getNameSpace()) && instanceMap.containsKey(field.getNameSpace()) ) {
+                Object currentObject = instanceMap.get(field.getNameSpace());
+                field.set(parentObject, currentObject);
+                setNestedObjects(field.getType(), nestedClassNames, instanceMap, currentObject);
             }
         }
     }

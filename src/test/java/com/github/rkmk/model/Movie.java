@@ -32,6 +32,12 @@ public class Movie {
     @OneToOne("director")
     private Director director;
 
+    @OneToOne("hero")
+    private Actor hero;
+    @OneToOne("comedian")
+    private Actor comedian;
+
+
     private BigDecimal ratings;
 
 }
