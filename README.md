@@ -8,7 +8,7 @@ Usage
        <dependency>
             <groupId>com.github.rkmk</groupId>
             <artifactId>jdbi-folder</artifactId>
-            <version>1.0</version>
+            <version>1.3</version>
         </dependency>
 
 
@@ -165,7 +165,7 @@ Automatically Director object will be created inside Movie object using this res
 
 Version:
 --------------------------------
-1.0
+1.3
 
 
 
